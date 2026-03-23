@@ -62,8 +62,22 @@ gap:8px;
 align-items:center;
 }
 
+.statgrid-new {
+    grid-template-columns: 120px 60px 60px;
+}
+
+.statgrid-header {
+    font-weight: bold;
+}
+
+.stat-value, .stat-mod {
+    text-align: center;
+}
+
 .statgrid input{
-width:35px;
+width:100%;
+box-sizing: border-box;
+text-align: center;
 }
 
 .statbtn{
@@ -228,33 +242,35 @@ Nome<br>
 
 <h3>Caratteristiche</h3>
 
-<div class="statgrid">
+<div class="statgrid statgrid-new">
 
-<b>Car</b><b>Val</b><b>Mod</b>
+<div class="statgrid-header">Caratteristica</div>
+<div class="statgrid-header">Valore</div>
+<div class="statgrid-header">Mod</div>
 
-<div>Forza</div>
-<div><input type="number" oninput="calcMod(this)"></div>
-<div>0</div>
+<div class="stat-name">Forza</div>
+<div class="stat-value"><input type="number" oninput="calcMod(this)"></div>
+<div class="stat-mod">0</div>
 
-<div>Destrezza</div>
-<div><input type="number" oninput="calcMod(this)"></div>
-<div>0</div>
+<div class="stat-name">Destrezza</div>
+<div class="stat-value"><input type="number" oninput="calcMod(this)"></div>
+<div class="stat-mod">0</div>
 
-<div>Costituzione</div>
-<div><input type="number" oninput="calcMod(this)"></div>
-<div>0</div>
+<div class="stat-name">Costituzione</div>
+<div class="stat-value"><input type="number" oninput="calcMod(this)"></div>
+<div class="stat-mod">0</div>
 
-<div>Intelligenza</div>
-<div><input type="number" oninput="calcMod(this)"></div>
-<div>0</div>
+<div class="stat-name">Intelligenza</div>
+<div class="stat-value"><input type="number" oninput="calcMod(this)"></div>
+<div class="stat-mod">0</div>
 
-<div>Saggezza</div>
-<div><input type="number" oninput="calcMod(this)"></div>
-<div>0</div>
+<div class="stat-name">Saggezza</div>
+<div class="stat-value"><input type="number" oninput="calcMod(this)"></div>
+<div class="stat-mod">0</div>
 
-<div>Carisma</div>
-<div><input type="number" oninput="calcMod(this)"></div>
-<div>0</div>
+<div class="stat-name">Carisma</div>
+<div class="stat-value"><input type="number" oninput="calcMod(this)"></div>
+<div class="stat-mod">0</div>
 
 </div>
 
@@ -496,13 +512,14 @@ Caratteristiche
 
 <div class="statgrid">
 
-<b>Car</b><b>Val</b><b>Mod</b><b></b>
+<div class="statgrid-header">Caratteristica</div>
+<div class="statgrid-header">Valore</div>
+<div class="statgrid-header">Mod</div>
+<div class="statgrid-header"></div>
 
-<div>Forza</div>
-
-<div><input type="number" value="${pg.stats[0]}" data-base="${pg.stats[0]}" oninput="gestioneStat(this,0)"></div>
-<div>${((Math.floor((pg.stats[0]-10)/2)>=0?"+":"") + Math.floor((pg.stats[0]-10)/2))}</div>
-
+<div class="stat-name">Forza</div>
+<div class="stat-value"><input type="number" value="${pg.stats[0]}" data-base="${pg.stats[0]}" oninput="gestioneStat(this,0)"></div>
+<div class="stat-mod">${((Math.floor((pg.stats[0]-10)/2)>=0?"+":"") + Math.floor((pg.stats[0]-10)/2))}</div>
 <div class="statbtn">
 ${aumentoDisponibile ? `
 <button onclick="modStat(0, -1)">➖</button>
@@ -510,10 +527,9 @@ ${aumentoDisponibile ? `
 ` : ``}
 </div>
 
-<div>Destrezza</div>
-<div><input type="number" value="${pg.stats[1]}" data-base="${pg.stats[1]}" oninput="gestioneStat(this,1)"></div>
-<div>${((Math.floor((pg.stats[1]-10)/2)>=0?"+":"") + Math.floor((pg.stats[1]-10)/2))}</div>
-
+<div class="stat-name">Destrezza</div>
+<div class="stat-value"><input type="number" value="${pg.stats[1]}" data-base="${pg.stats[1]}" oninput="gestioneStat(this,1)"></div>
+<div class="stat-mod">${((Math.floor((pg.stats[1]-10)/2)>=0?"+":"") + Math.floor((pg.stats[1]-10)/2))}</div>
 <div class="statbtn">
 ${aumentoDisponibile ? `
 <button onclick="modStat(1, -1)">➖</button>
@@ -521,10 +537,9 @@ ${aumentoDisponibile ? `
 ` : ``}
 </div>
 
-<div>Costituzione</div>
-<div><input type="number" value="${pg.stats[2]}" data-base="${pg.stats[2]}" oninput="gestioneStat(this,2)"></div>
-<div>${((Math.floor((pg.stats[2]-10)/2)>=0?"+":"") + Math.floor((pg.stats[2]-10)/2))}</div>
-
+<div class="stat-name">Costituzione</div>
+<div class="stat-value"><input type="number" value="${pg.stats[2]}" data-base="${pg.stats[2]}" oninput="gestioneStat(this,2)"></div>
+<div class="stat-mod">${((Math.floor((pg.stats[2]-10)/2)>=0?"+":"") + Math.floor((pg.stats[2]-10)/2))}</div>
 <div class="statbtn">
 ${aumentoDisponibile ? `
 <button onclick="modStat(2, -1)">➖</button>
@@ -532,10 +547,9 @@ ${aumentoDisponibile ? `
 ` : ``}
 </div>
 
-<div>Intelligenza</div>
-<div><input type="number" value="${pg.stats[3]}" data-base="${pg.stats[3]}" oninput="gestioneStat(this,3)"></div>
-<div>${((Math.floor((pg.stats[3]-10)/2)>=0?"+":"") + Math.floor((pg.stats[3]-10)/2))}</div>
-
+<div class="stat-name">Intelligenza</div>
+<div class="stat-value"><input type="number" value="${pg.stats[3]}" data-base="${pg.stats[3]}" oninput="gestioneStat(this,3)"></div>
+<div class="stat-mod">${((Math.floor((pg.stats[3]-10)/2)>=0?"+":"") + Math.floor((pg.stats[3]-10)/2))}</div>
 <div class="statbtn">
 ${aumentoDisponibile ? `
 <button onclick="modStat(3, -1)">➖</button>
@@ -543,10 +557,9 @@ ${aumentoDisponibile ? `
 ` : ``}
 </div>
 
-<div>Saggezza</div>
-<div><input type="number" value="${pg.stats[4]}" data-base="${pg.stats[4]}" oninput="gestioneStat(this,4)"></div>
-<div>${((Math.floor((pg.stats[4]-10)/2)>=0?"+":"") + Math.floor((pg.stats[4]-10)/2))}</div>
-
+<div class="stat-name">Saggezza</div>
+<div class="stat-value"><input type="number" value="${pg.stats[4]}" data-base="${pg.stats[4]}" oninput="gestioneStat(this,4)"></div>
+<div class="stat-mod">${((Math.floor((pg.stats[4]-10)/2)>=0?"+":"") + Math.floor((pg.stats[4]-10)/2))}</div>
 <div class="statbtn">
 ${aumentoDisponibile ? `
 <button onclick="modStat(4, -1)">➖</button>
@@ -554,10 +567,9 @@ ${aumentoDisponibile ? `
 ` : ``}
 </div>
 
-<div>Carisma</div>
-<div><input type="number" value="${pg.stats[5]}" data-base="${pg.stats[5]}" oninput="gestioneStat(this,5)"></div>
-<div>${((Math.floor((pg.stats[5]-10)/2)>=0?"+":"") + Math.floor((pg.stats[5]-10)/2))}</div>
-
+<div class="stat-name">Carisma</div>
+<div class="stat-value"><input type="number" value="${pg.stats[5]}" data-base="${pg.stats[5]}" oninput="gestioneStat(this,5)"></div>
+<div class="stat-mod">${((Math.floor((pg.stats[5]-10)/2)>=0?"+":"") + Math.floor((pg.stats[5]-10)/2))}</div>
 <div class="statbtn">
 ${aumentoDisponibile ? `
 <button onclick="modStat(5, -1)">➖</button>
