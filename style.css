@@ -1,0 +1,117 @@
+
+body{
+font-family:Arial;
+background:#1e1e1e;
+color:white;
+margin:0;
+padding:20px;
+}
+
+button{
+padding:10px 15px;
+font-size:16px;
+cursor:pointer;
+margin-top:10px;
+}
+
+.card{
+background:#2b2b2b;
+padding:15px;
+margin-top:15px;
+border-radius:8px;
+cursor:pointer;
+transition:0.2s;
+}
+
+.card:hover{
+background:#3a3a3a;
+transform:scale(1.02);
+}
+
+.bar{
+height:20px;
+background:#444;
+border-radius:6px;
+overflow:hidden;
+margin-top:5px;
+}
+
+.fill{
+height:100%;
+}
+
+.hp{background:green;}
+.xp{background:gold;}
+
+input{
+padding:5px;
+margin:3px;
+}
+
+.statgrid{
+display:grid;
+grid-template-columns: 120px 60px 60px 90px;
+gap:8px;
+align-items:center;
+}
+
+.statgrid-new {
+    grid-template-columns: 120px 60px 60px;
+}
+
+.statgrid-header {
+    font-weight: bold;
+}
+
+.stat-value, .stat-mod {
+    text-align: center;
+}
+
+.statgrid input{
+width:100%;
+box-sizing: border-box;
+text-align: center;
+}
+
+.statbtn{
+display:flex;
+gap:5px;
+}
+
+.statbtn button{
+width:28px;
+height:28px;
+font-size:16px;
+padding:0;
+cursor:pointer;
+}
+
+.pgLayout{
+display:grid;
+grid-template-columns: 1fr 350px;
+gap:30px;
+}
+
+.sessionBox{
+background:#2b2b2b;
+padding:15px;
+border-radius:8px;
+height:fit-content;
+}
+
+.sessionPanel{
+position:fixed;
+right:20px;
+top:120px;
+width:300px;
+background:#2b2b2b;
+padding:15px;
+border-radius:8px;
+}
+
+.deleteBtn{
+background-color: #c0392b;
+color: white;
+border: none;
+margin-left: 10px;
+}
