@@ -102,6 +102,13 @@ padding:15px;
 border-radius:8px;
 }
 
+.deleteBtn{
+background-color: #c0392b;
+color: white;
+border: none;
+margin-left: 10px;
+}
+
 </style>
 
 </head>
@@ -303,55 +310,82 @@ function calcMod(input){
 
 function salvaPG(){
 
-let nome = document.getElementById("nome").value;
+    let nome = document.getElementById("nome").value;
 
-let classInputs = document.querySelectorAll(".classe");
-let levelInputs = document.querySelectorAll(".livello");
+    if (nome.trim() === "") {
+        alert("Il nome del personaggio non può essere vuoto.");
+        return;
+    }
 
-let classi = [];
+    let classInputs = document.querySelectorAll(".classe");
+    let levelInputs = document.querySelectorAll(".livello");
 
-for(let i=0;i<classInputs.length;i++){
+    let classi = [];
 
-let c = classInputs[i].value;
-let l = parseInt(levelInputs[i].value);
+    for(let i=0;i<classInputs.length;i++){
 
-if(c && l){
-classi.push({nome:c, livello:l});
-}
+        let c = classInputs[i].value.trim();
+        let l = parseInt(levelInputs[i].value);
 
-}
+        if(c && l > 0){
+            classi.push({nome:c, livello:l});
+        } else if (c || levelInputs[i].value) {
+            alert(`La riga classe ${i+1} non è compilata correttamente. Assicurati che il nome non sia vuoto e il livello sia maggiore di 0.`);
+            return;
+        }
+    }
 
-let pfmax = parseInt(document.getElementById("pfmax").value) || 0;
-let xp = parseInt(document.getElementById("xp").value) || 0;
+    if (classi.length === 0) {
+        alert("Aggiungi almeno una classe.");
+        return;
+    }
 
-let stats = [];
+    let pfmax = parseInt(document.getElementById("pfmax").value);
+    let xp = parseInt(document.getElementById("xp").value);
 
-let statInputs = document.querySelectorAll(".statgrid input");
+    if (isNaN(pfmax) || pfmax <= 0) {
+        alert("I Punti Ferita massimi devono essere un numero maggiore di 0.");
+        return;
+    }
 
-for(let i=0;i<statInputs.length;i++){
-stats.push(parseInt(statInputs[i].value) || 0);
-}
+    if (isNaN(xp) || xp < 0) {
+        alert("I Punti Esperienza devono essere un numero uguale o maggiore di 0.");
+        return;
+    }
 
-let pg = {
+    let stats = [];
+    let statInputs = document.querySelectorAll(".statgrid input");
 
-nome:nome,
-classi:classi,
-stats:stats,
-statsBase:[...stats],
-pfmax:pfmax,
-pf:pfmax,
-xpBase:xp,
-xp:xp,
-sessioni:[],
-ultimoAumentoStat:0
+    for(let i=0;i<statInputs.length;i++){
+        let statVal = parseInt(statInputs[i].value);
+        if (isNaN(statVal)) {
+            let statName = statInputs[i].parentElement.previousElementSibling.textContent;
+            alert(`Il valore per ${statName} non è un numero valido.`);
+            return;
+        }
+        stats.push(statVal);
+    }
 
-};
+    let pg = {
 
-party.push(pg);
+        nome:nome.trim(),
+        classi:classi,
+        stats:stats,
+        statsBase:[...stats],
+        pfmax:pfmax,
+        pf:pfmax,
+        xpBase:xp,
+        xp:xp,
+        sessioni:[],
+        ultimoAumentoStat:0
 
-salva();
+    };
 
-menuPG();
+    party.push(pg);
+
+    salva();
+
+    menuPG();
 
 }
 
@@ -539,6 +573,7 @@ PF Massimi<br>
 <input id="pfmax" type="number" value="${pg.pfmax}" disabled><br><br>
 
 <button id="salvaBtn" onclick="modificaPG(${index})">💾 Salva modifiche</button>
+<button class="deleteBtn" onclick="eliminaPG(${index})">🗑️ Elimina</button>
 <span id="statMsg" style="margin-left:10px;color:orange;font-weight:bold;"></span>
 
 <div class="sessionPanel">
@@ -633,6 +668,15 @@ c3.innerText = totale;
 
 }
 
+function eliminaPG(index) {
+    const pg = party[index];
+    if (confirm(`Sei sicuro di voler eliminare ${pg.nome}? L'azione è irreversibile.`)) {
+        party.splice(index, 1);
+        salva();
+        menuPG();
+    }
+}
+
 function modificaPG(index){
 
 let pg = party[index];
@@ -688,43 +732,50 @@ menuPG();
 
 function nuovaSessione(index){
 
-let pg = party[index];
+    let pg = party[index];
 
-if(!pg.sessioni){
-pg.sessioni = [];
-}
+    if(!pg.sessioni){
+        pg.sessioni = [];
+    }
 
-let xp = prompt("XP ricevuti nella sessione:");
+    let xpInput = prompt("XP ricevuti nella sessione:");
 
-xp = parseInt(xp);
+    if (xpInput === null) { // User pressed cancel
+        return;
+    }
 
-if(!xp) return;
+    let xp = parseInt(xpInput);
 
-pg.sessioni.push(xp);
+    if (isNaN(xp)) {
+        alert("Inserisci un valore numerico per gli XP.");
+        return;
+    }
 
-let livelloPrima = livelloDaXP(pg.xp);
+    pg.sessioni.push(xp);
 
-let totaleSessioni = 0;
+    let livelloPrima = livelloDaXP(pg.xp);
 
-for(let i=0;i<pg.sessioni.length;i++){
-totaleSessioni += pg.sessioni[i];
-}
+    let totaleSessioni = 0;
 
-pg.xp = pg.xpBase + totaleSessioni;
+    for(let i=0;i<pg.sessioni.length;i++){
+        totaleSessioni += pg.sessioni[i];
+    }
 
-let livelloDopo = livelloDaXP(pg.xp);
+    pg.xp = pg.xpBase + totaleSessioni;
 
-if(livelloDopo > livelloPrima){
+    let livelloDopo = livelloDaXP(pg.xp);
 
-pannelloLevelUp(index, livelloDopo);
-salva();
-return;
+    if(livelloDopo > livelloPrima){
 
-}
+        pannelloLevelUp(index, livelloDopo);
+        salva();
+        return;
 
-salva();
+    }
 
-apriPG(index);
+    salva();
+
+    apriPG(index);
 
 }
 
@@ -869,18 +920,21 @@ document.getElementById("app").innerHTML = html;
 
 function confermaNuovaClasse(index){
 
-let nome = document.getElementById("nuovaClasseNome").value;
+    let nome = document.getElementById("nuovaClasseNome").value;
 
-if(!nome) return;
+    if(nome.trim() === ''){
+        alert("Il nome della classe non può essere vuoto.");
+        return;
+    }
 
-party[index].classi.push({
-nome:nome,
-livello:1
-});
+    party[index].classi.push({
+        nome:nome.trim(),
+        livello:1
+    });
 
-salva();
+    salva();
 
-menuPG();
+    menuPG();
 
 }
 
