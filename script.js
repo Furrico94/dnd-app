@@ -94,7 +94,10 @@ function menuPG(){
         let livelloTot = 0;
 
         for(let j=0;j<pg.classi.length;j++){
-            classi += pg.classi[j].nome+" "+pg.classi[j].livello+" ";
+            if(j>0){
+                classi += "/";
+            }
+            classi += pg.classi[j].nome+" "+pg.classi[j].livello;
             livelloTot += pg.classi[j].livello;
         }
 
@@ -106,8 +109,8 @@ function menuPG(){
 
         html += `
         <div class="card" onclick="apriPG(${i})">
-            <b>${pg.nome}</b><br>
-            ${classi}(Lv ${livelloTot})
+            <b>${pg.nome} (Lv ${livelloTot})</b><br>
+            ${classi}
             <br><br>
             ${pg.pf}/${pg.pfmax}
             <div class="bar"><div class="fill hp" style="width:${hpPerc}%"></div></div>
@@ -162,6 +165,7 @@ function aggiungiClasse(){
 function calcMod(input){
     let val = parseInt(input.value) || 0;
     let mod = Math.floor((val - 10) / 2);
+    let valDiv = input.parentElement;
     let modDiv = input.parentElement.nextElementSibling;
     if(mod >= 0){
         modDiv.textContent = "+" + mod;
@@ -196,11 +200,11 @@ function salvaPG(){
     let pfmax = parseInt(document.getElementById("pfmax").value);
     let xp = parseInt(document.getElementById("xp").value);
     if (isNaN(pfmax) || pfmax <= 0) {
-        alert("I Punti Ferita massimi devono essere un numero maggiore di 0.");
+        alert("I Punti Ferita massimi devono essere un numero maggiore di 0!");
         return;
     }
     if (isNaN(xp) || xp < 0) {
-        alert("I Punti Esperienza devono essere un numero uguale o maggiore di 0.");
+        alert("I Punti Esperienza devono essere un numero uguale o maggiore di 0");
         return;
     }
     let stats = [];
@@ -223,6 +227,19 @@ function salvaPG(){
     menuPG();
 }
 
+function calcXP(xp){
+    let livello = 1;
+    for(let i=0;i<XP_LEVELS.length;i++){
+        if(xp >= XP_LEVELS[i]){
+        livello = i+1;
+        }
+    }
+    let base = XP_LEVELS[livello-1];
+    let next = XP_LEVELS[livello] || XP_LEVELS[livello-1];
+    let percentuale = ((xp-base)/(next-base))*100;
+    return percentuale;
+}
+
 function livelloDaXP(xp){
     let livello = 1;
     for(let i=0;i<XP_LEVELS.length;i++){
@@ -231,6 +248,13 @@ function livelloDaXP(xp){
         }
     }
     return livello;
+}
+
+function aumentoCaratteristica(livello, pg){
+    if(livello % 4 === 0 && pg.ultimoAumentoStat !== livello){
+    return "<span style='color:gold;margin-left:10px;'>⬆ Aumento caratteristica disponibile</span>";
+    }
+return "";
 }
 
 function apriPG(index){
@@ -246,7 +270,7 @@ function apriPG(index){
     let livelloTot = 0;
     for(let i=0;i<pg.classi.length;i++){
         livelloTot += pg.classi[i].livello;
-        classiHTML += `<div><span>${pg.classi[i].nome}</span> <span>Lv</span> <span>${pg.classi[i].livello}</span></div>`;
+        classiHTML += `<div><span>${pg.classi[i].nome}</span> <span>${"Lv"}</span> <span>${pg.classi[i].livello}</span></div>`;
     }
     let html = `
     <h2>${pg.nome}</h2>
@@ -271,14 +295,50 @@ function apriPG(index){
     <div class="sessionPanel">
         <h3>Esperienza</h3>
         <div id="xpText">${pg.xp} / ${xpNext}</div>
-        <div class="bar"><div class="fill xp" id="xpBar" style="width:${xpPerc}%"></div></div><br>
+        <div class="bar"><div class="fill xp" id="xpBar"></div></div>
+        <br>
         <h3>Sessioni XP</h3>
-        <table id="tabellaXP" border="1" style="margin-top:10px;border-collapse:collapse;width:100%;"><tr><th>Sessione</th><th>PX</th><th>Totale</th></tr></table>
+        <table id="tabellaXP" border="1" style="margin-top:10px;border-collapse:collapse;width:100%;"><tr>
+        <th>Sessione</th><th>PX</th><th>Totale</th></tr></table>
         <button onclick="nuovaSessione(${index})">➕ Nuova sessione</button>
     </div>
+    <br><br>
     `;
     document.getElementById("app").innerHTML = html;
-    // ... and so on
+    document.querySelectorAll(".statgrid input").forEach(input => {
+        if(input.value){
+            calcMod(input);
+        }
+    });
+    if (pg.inLevelUp){
+        document.getElementById("pfmax").disabled = false;
+    }
+    document.getElementById("xpText").innerText = pg.xp + " / " + xpNext;
+    document.getElementById("xpBar").style.width = xpPerc + "%";
+    aumentoDisponibile = (livello % 4 === 0) && (pg.ultimoAumentoStat !== livello);
+    let btn = document.getElementById("salvaBtn");
+    let msg = document.getElementById("statMsg");
+    if(aumentoDisponibile){
+        btn.disabled = true;
+        msg.innerText = "⬆ Distribuisci il punto caratteristica";
+    }else{
+        btn.disabled = false;
+        msg.innerText = "";
+    }
+    let tabella = document.getElementById("tabellaXP");
+    if(pg.sessioni){
+        let totale = pg.xpBase;
+        for(let i=0;i<pg.sessioni.length;i++){
+            totale += pg.sessioni[i];
+            let riga = tabella.insertRow();
+            let c1 = riga.insertCell(0);
+            let c2 = riga.insertCell(1);
+            let c3 = riga.insertCell(2);
+            c1.innerText = i+1;
+            c2.innerText = pg.sessioni[i];
+            c3.innerText = totale;
+        }
+    }
 }
 
 function eliminaPG(index) {
@@ -313,14 +373,28 @@ function modificaPG(index){
     pg.xp = pg.xp;
     let livelloDopo = livelloDaXP(pg.xp);
     if(livelloDopo > livelloPrima){
+        party[index].inLevelUp = true;
         pannelloLevelUp(index, livelloDopo);
         return;
     }
-    if(statBonusUsato !== -1){
-        pg.ultimoAumentoStat = livelloDaXP(pg.xp);
+
+    let aumentoUsato = false;
+    for(let i=0; i<pg.stats.length;i++){
+        if(pg.stats[i] > pg.statsBase[i]){
+            aumentoUsato=true;
+            break;
+        }
     }
-    party[index].inLevelUp = true;
+    if(aumentoUsato){
+        pg.ultimoAumentoStat = livelloDaXP(pg.xp);
+        pg.statsBase = [...pg.stats];
+        
+    //if(statBonusUsato !== -1){
+    //    pg.ultimoAumentoStat = livelloDaXP(pg.xp);
+    //}
+    //party[index].inLevelUp = true;
     salva();
+        statBonusUsato = -1;
     menuPG();
 }
 
@@ -353,6 +427,8 @@ function nuovaSessione(index){
     apriPG(index);
 }
 
+let statBonusUsato = -1;    
+    
 function gestioneStat(input,index){
     let pgIndex = document.body.dataset.pgIndex;
     let pg = party[pgIndex];
@@ -393,52 +469,141 @@ function gestioneStat(input,index){
 }
 
 function pannelloLevelUp(index, livello){
+    let pg=party[index];
+    //reset stato level up
+    pg.levelUpMode = null;
+    pg.selectedClassIndex = null;
+    
     let html = `
     <h2>🎉 Level Up!</h2>
     <p>Il personaggio è salito al livello ${livello}</p>
     <br><br>
-    <button onclick="scegliClasseEsistente(${index})">+ livello in classe esistente</button>
+    <h3>Punti Ferita guadagnati</h3>
+    <input id="pfLevelUp" type="number" placeholder="da 1 a 20">
     <br><br>
-    <button onclick="nuovaClasse(${index})">+ nuova classe</button>
+    <h3>Scelta Classe</h3>
+    <div id="sceltaClasse">
+    <button onclick="mostraClassi${index}">Classi esistenti</button>
+    <br><br>
+    <button onclick="mostraNuovaClasse${index}">Nuova classe</button>
+    </div>
+    <br><br>
+    <button onclick="confermaLevelUp(${index})">✅ Conferma Level Up</button>
     `;
     document.getElementById("app").innerHTML = html;
 }
 
-function scegliClasseEsistente(index){
+function mostraClassi(index){
     let pg = party[index];
-    let html = `<h2>Scegli la classe da aumentare</h2>`;
+    pg.levelUpMode = "existing";
+    let html = `<button onclick="pannelloLevelUp(${index}, ${livelloDaXP(pg.xp)})">⬅ Indietro</button><br><br>`;
     for(let i=0;i<pg.classi.length;i++){
-        html += `<button onclick="aumentaClasse(${index},${i})">${pg.classi[i].nome} (Liv ${pg.classi[i].livello})</button><br><br>`;
+        let selected = (pg.selectedClassIndex === i) ? "style='background:green'" : "";
+        html += `
+        <button ${selected} onclick="selezionaClasse(${index}, ${i})">${pg.classi[i].nome} (Lv ${pg.classi[i].livello})</button>
+        <br><br>
+        `;
     }
-    document.getElementById("app").innerHTML = html;
+    document.getElementById("sceltaClasse").innerHTML = html;
 }
 
-function aumentaClasse(index,classeIndex){
-    party[index].classi[classeIndex].livello += 1;
+function selezionaClasse(index, classeIndex){
+    let pg = party[index];
+    pg.selectedClassIndex = classeIndex;
+    mostraClassi(index);
+}
+
+function mostraNuovaClasse(index){
+    let pg = party[index];
+    pg.levelUpMode = "new";
+    let html = `
+    <button onclick="pannelloLevelUp(${index}, ${livelloDaXP(pg.xp)})">⬅ Indietro</button>
+    <br><br>
+    Nome nuova classe:<br><input id="nuovaClasseNome">
+    `;
+    document.getElementById("sceltaClasse").innerHTML = html;
+}
+
+function confermaLevelUp(index){
+    let pg = party[index];
+    let pfGain = parseInt(document.getElementById("pfLevelUp").value);
+    // VALIDAZIONE PF
+    if(isNaN(pfGain) || pfGain < 1 || pfGain > 20){
+        alert("I PF devono essere un numero tra 1 e 20"); //ho messo questo limite perché non penso che con un livello uno possa acquisire più di 20 pf, per ora il DV più alto è il barbaro con il d12 e per arrivare a 20 dovrebbe avere COS 26... 
+    return;
+    }
+    // VALIDAZIONE SCELTA
+    if(!pg.levelUpMode){
+        alert("Devi scegliere una modalità (classe esistente o nuova)");
+    return;
+    }
+    // CASO CLASSE ESISTENTE
+    if(pg.levelUpMode === "existing"){
+        if(pg.selectedClassIndex === null){
+            alert("Seleziona una classe");
+        return;
+        }
+    pg.classi[pg.selectedClassIndex].livello += 1;
+    }
+    // CASO NUOVA CLASSE
+    if(pg.levelUpMode === "new"){
+        let nome = document.getElementById("nuovaClasseNome")?.value;
+        if(!nome || nome.trim() === ""){
+            alert("Inserisci il nome della nuova classe");
+        return;
+        }
+        pg.classi.push({
+        nome:nome.trim(),
+        livello:1
+        });
+    }
+    // AGGIUNTA PF
+    pg.pfmax += pfGain;
+    pg.pf += pfGain;
+    // PULIZIA
+    pg.levelUpMode = null;
+    pg.selectedClassIndex = null;
+    pg.inLevelUp = false;
+
     salva();
     apriPG(index);
-}
+}    
 
-function nuovaClasse(index){
-    let html = `
-    <h2>Nuova Classe</h2>
-    Nome classe<br><input id="nuovaClasseNome">
-    <br><br>
-    <button onclick="confermaNuovaClasse(${index})">Aggiungi classe</button>
-    `;
-    document.getElementById("app").innerHTML = html;
-}
+//function scegliClasseEsistente(index){
+//    let pg = party[index];
+//    let html = `<h2>Scegli la classe da aumentare</h2>`;
+//    for(let i=0;i<pg.classi.length;i++){
+//        html += `<button onclick="aumentaClasse(${index},${i})">${pg.classi[i].nome} (Liv ${pg.classi[i].livello})</button><br><br>`;
+//    }
+//    document.getElementById("app").innerHTML = html;
+//}
 
-function confermaNuovaClasse(index){
-    let nome = document.getElementById("nuovaClasseNome").value;
-    if(nome.trim() === ''){
-        alert("Il nome della classe non può essere vuoto.");
-        return;
-    }
-    party[index].classi.push({ nome:nome.trim(), livello:1 });
-    salva();
-    menuPG();
-}
+//function aumentaClasse(index,classeIndex){
+//    party[index].classi[classeIndex].livello += 1;
+//    salva();
+//    apriPG(index);
+//}
+
+//function nuovaClasse(index){
+//    let html = `
+//    <h2>Nuova Classe</h2>
+//    Nome classe<br><input id="nuovaClasseNome">
+//    <br><br>
+//    <button onclick="confermaNuovaClasse(${index})">Aggiungi classe</button>
+//    `;
+//    document.getElementById("app").innerHTML = html;
+//}
+
+//function confermaNuovaClasse(index){
+//    let nome = document.getElementById("nuovaClasseNome").value;
+//    if(nome.trim() === ''){
+//        alert("Il nome della classe non può essere vuoto.");
+//        return;
+//    }
+//    party[index].classi.push({ nome:nome.trim(), livello:1 });
+//    salva();
+//    menuPG();
+//}
 
 function modStat(statIndex, delta){
     let index = document.body.dataset.pgIndex;
@@ -446,7 +611,7 @@ function modStat(statIndex, delta){
     let input = inputs[statIndex];
     let base = parseInt(input.dataset.base);
     let attuale = parseInt(input.value);
-    if(attuale + delta < base) return;
+    if(attuale + delta < base)return;
     let bonusUsato = 0;
     inputs.forEach(inp => {
         bonusUsato += (parseInt(inp.value) - parseInt(inp.dataset.base));
@@ -473,6 +638,8 @@ function aggiornaBottoneSalva(){
         msg.innerText = "";
     }
 }
+
+menuPG();
 
 // ========================================================================
 // Initial Load
