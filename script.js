@@ -639,7 +639,7 @@ function aggiornaBottoneSalva(){
     }
 }
 
-menuPG();
+//menuPG();
 
 // ========================================================================
 // Initial Load
