@@ -95,7 +95,7 @@ function menuPG(){
 
         for(let j=0;j<pg.classi.length;j++){
             if(j>0){
-                classi += "/";
+                classi += " / ";
             }
             classi += pg.classi[j].nome+" "+pg.classi[j].livello;
             livelloTot += pg.classi[j].livello;
@@ -226,19 +226,6 @@ function salvaPG(){
     salva();
     menuPG();
 }
-
-//function calcXP(xp){
-//    let livello = 1;
-//    for(let i=0;i<XP_LEVELS.length;i++){
-//        if(xp >= XP_LEVELS[i]){
-//        livello = i+1;
-//        }
-//    }
-//    let base = XP_LEVELS[livello-1];
-//    let next = XP_LEVELS[livello] || XP_LEVELS[livello-1];
-//    let percentuale = ((xp-base)/(next-base))*100;
-//    return percentuale;
-//}
 
 function livelloDaXP(xp){
     let livello = 1;
@@ -389,10 +376,7 @@ function modificaPG(index){
         pg.ultimoAumentoStat = livelloDaXP(pg.xp);
         pg.statsBase = [...pg.stats];
     }
-    //if(statBonusUsato !== -1){
-    //    pg.ultimoAumentoStat = livelloDaXP(pg.xp);
-    //}
-    //party[index].inLevelUp = true;
+    
     salva();
         statBonusUsato = -1;
     menuPG();
@@ -426,8 +410,6 @@ function nuovaSessione(index){
     salva();
     apriPG(index);
 }
-
-//let statBonusUsato = -1;    
     
 function gestioneStat(input,index){
     let pgIndex = document.body.dataset.pgIndex;
@@ -568,42 +550,6 @@ function confermaLevelUp(index){
     salva();
     apriPG(index);
 }    
-
-//function scegliClasseEsistente(index){
-//    let pg = party[index];
-//    let html = `<h2>Scegli la classe da aumentare</h2>`;
-//    for(let i=0;i<pg.classi.length;i++){
-//        html += `<button onclick="aumentaClasse(${index},${i})">${pg.classi[i].nome} (Liv ${pg.classi[i].livello})</button><br><br>`;
-//    }
-//    document.getElementById("app").innerHTML = html;
-//}
-
-//function aumentaClasse(index,classeIndex){
-//    party[index].classi[classeIndex].livello += 1;
-//    salva();
-//    apriPG(index);
-//}
-
-//function nuovaClasse(index){
-//    let html = `
-//    <h2>Nuova Classe</h2>
-//    Nome classe<br><input id="nuovaClasseNome">
-//    <br><br>
-//    <button onclick="confermaNuovaClasse(${index})">Aggiungi classe</button>
-//    `;
-//    document.getElementById("app").innerHTML = html;
-//}
-
-//function confermaNuovaClasse(index){
-//    let nome = document.getElementById("nuovaClasseNome").value;
-//    if(nome.trim() === ''){
-//        alert("Il nome della classe non può essere vuoto.");
-//        return;
-//    }
-//    party[index].classi.push({ nome:nome.trim(), livello:1 });
-//    salva();
-//    menuPG();
-//}
 
 function modStat(statIndex, delta){
     let index = document.body.dataset.pgIndex;
