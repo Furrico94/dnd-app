@@ -396,6 +396,7 @@ function modificaPG(index){
     salva();
         statBonusUsato = -1;
     menuPG();
+    }
 }
 
 function nuovaSessione(index){
