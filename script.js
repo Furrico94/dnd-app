@@ -483,9 +483,9 @@ function pannelloLevelUp(index, livello){
     <br><br>
     <h3>Scelta Classe</h3>
     <div id="sceltaClasse">
-    <button onclick="mostraClassi${index}">Classi esistenti</button>
+    <button onclick="mostraClassi(${index})">Classi esistenti</button>
     <br><br>
-    <button onclick="mostraNuovaClasse${index}">Nuova classe</button>
+    <button onclick="mostraNuovaClasse(${index})">Nuova classe</button>
     </div>
     <br><br>
     <button onclick="confermaLevelUp(${index})">✅ Conferma Level Up</button>
@@ -645,4 +645,4 @@ menuPG();
 // Initial Load
 // ========================================================================
 
-//checkAuth();
+checkAuth();
