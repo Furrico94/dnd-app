@@ -166,7 +166,7 @@ function calcMod(input){
     let val = parseInt(input.value) || 0;
     let mod = Math.floor((val - 10) / 2);
     let valDiv = input.parentElement;
-    let modDiv = input.parentElement.nextElementSibling;
+    let modDiv = valDiv.nextElementSibling;
     if(mod >= 0){
         modDiv.textContent = "+" + mod;
     } else {
@@ -227,18 +227,18 @@ function salvaPG(){
     menuPG();
 }
 
-function calcXP(xp){
-    let livello = 1;
-    for(let i=0;i<XP_LEVELS.length;i++){
-        if(xp >= XP_LEVELS[i]){
-        livello = i+1;
-        }
-    }
-    let base = XP_LEVELS[livello-1];
-    let next = XP_LEVELS[livello] || XP_LEVELS[livello-1];
-    let percentuale = ((xp-base)/(next-base))*100;
-    return percentuale;
-}
+//function calcXP(xp){
+//    let livello = 1;
+//    for(let i=0;i<XP_LEVELS.length;i++){
+//        if(xp >= XP_LEVELS[i]){
+//        livello = i+1;
+//        }
+//    }
+//    let base = XP_LEVELS[livello-1];
+//    let next = XP_LEVELS[livello] || XP_LEVELS[livello-1];
+//    let percentuale = ((xp-base)/(next-base))*100;
+//    return percentuale;
+//}
 
 function livelloDaXP(xp){
     let livello = 1;
@@ -388,7 +388,7 @@ function modificaPG(index){
     if(aumentoUsato){
         pg.ultimoAumentoStat = livelloDaXP(pg.xp);
         pg.statsBase = [...pg.stats];
-        
+    }
     //if(statBonusUsato !== -1){
     //    pg.ultimoAumentoStat = livelloDaXP(pg.xp);
     //}
@@ -396,7 +396,6 @@ function modificaPG(index){
     salva();
         statBonusUsato = -1;
     menuPG();
-    }
 }
 
 function nuovaSessione(index){
@@ -428,7 +427,7 @@ function nuovaSessione(index){
     apriPG(index);
 }
 
-let statBonusUsato = -1;    
+//let statBonusUsato = -1;    
     
 function gestioneStat(input,index){
     let pgIndex = document.body.dataset.pgIndex;
