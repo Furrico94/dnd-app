@@ -49,13 +49,13 @@ margin:3px;
 
 .statgrid{
 display:grid;
-grid-template-columns: 120px 60px 60px 90px;
+grid-template-columns: 3fr 1.5fr 1fr 2fr;
 gap:8px;
 align-items:center;
 }
 
 .statgrid-new {
-    grid-template-columns: 120px 60px 60px;
+    grid-template-columns: 3fr 1.5fr 1fr;
 }
 
 .statgrid-header {
@@ -221,7 +221,17 @@ margin-left: 10px;
 
 @media (max-width: 480px) {
     .statgrid {
-        grid-template-columns: 100px 50px 50px 70px;
+        grid-template-columns: 2fr 1fr 1fr 1.5fr;
         gap: 5px;
+        font-size: 14px;
+    }
+    .statgrid-new {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+
+    .statbtn button{
+        width:24px;
+        height:24px;
+        font-size:14px;
     }
 }
