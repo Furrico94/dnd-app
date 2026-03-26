@@ -1,7 +1,10 @@
-
 body{
 font-family: 'MedievalSharp', cursive;
-background:#1a1a1a;
+background-color: #1a1a1a; /* Dark base color */
+background-image: 
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+background-size: 20px 20px; /* Subtle grid pattern */
 color:#e0e0e0;
 margin:0;
 padding:20px;
@@ -9,7 +12,8 @@ padding:20px;
 
 h1, h2, h3 {
     font-family: 'Cinzel Decorative', cursive;
-    color: #e0e0e0;
+    color: #f0f0f0; /* Slightly lighter for headers */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Add some depth */
 }
 
 button{
@@ -17,18 +21,21 @@ padding:10px 15px;
 font-size:16px;
 cursor:pointer;
 margin-top:10px;
-background: #4a4a4a;
+background: linear-gradient(to bottom, #5a5a5a, #3a3a3a); /* Gradient for depth */
 color: #e0e0e0;
-border: 1px solid #666;
+border: 1px solid #777;
 border-radius: 4px;
 text-transform: uppercase;
 letter-spacing: 1px;
-transition: background 0.2s, transform 0.2s;
+transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+box-shadow: 2px 2px 5px rgba(0,0,0,0.5); /* Initial shadow */
+text-shadow: 1px 1px 2px rgba(0,0,0,0.7); /* Text shadow for buttons */
 }
 
 button:hover{
-background:#5a5a5a;
+background: linear-gradient(to bottom, #6a6a6a, #4a4a4a); /* Lighter gradient on hover */
 transform: translateY(-1px);
+box-shadow: 3px 3px 8px rgba(0,0,0,0.7); /* More pronounced shadow on hover */
 }
 
 .card{
@@ -39,13 +46,13 @@ border-radius:8px;
 cursor:pointer;
 transition:0.2s;
 border: 1px solid #444;
-box-shadow: 3px 3px 8px rgba(0,0,0,0.3);
+box-shadow: 4px 4px 10px rgba(0,0,0,0.5); /* More pronounced shadow */
 }
 
 .card:hover{
 background:#3a3a3a;
 transform: translateY(-2px) scale(1.02);
-box-shadow: 5px 5px 10px rgba(0,0,0,0.4);
+box-shadow: 6px 6px 12px rgba(0,0,0,0.7); /* Even more pronounced shadow on hover */
 }
 
 .bar{
@@ -55,14 +62,15 @@ border-radius:6px;
 overflow:hidden;
 margin-top:5px;
 border: 1px solid #333;
+box-shadow: inset 0 0 5px rgba(0,0,0,0.5); /* Inset shadow for bars */
 }
 
 .fill{
 height:100%;
 }
 
-.hp{background:green;}
-.xp{background:gold;}
+.hp{background:linear-gradient(to right, #28a745, #218838);} /* Gradient for HP bar */
+.xp{background:linear-gradient(to right, #ffc107, #e0a800);} /* Gradient for XP bar */
 
 input, select{
 padding:8px;
@@ -72,6 +80,7 @@ border: 1px solid #555;
 color: #e0e0e0;
 border-radius: 4px;
 box-sizing: border-box;
+box-shadow: inset 0 0 5px rgba(0,0,0,0.5); /* Inset shadow for inputs */
 }
 
 .statgrid{
@@ -88,6 +97,7 @@ align-items:center;
 .statgrid-header {
     font-weight: bold;
     color: #f0f0f0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .stat-value, .stat-mod {
@@ -125,7 +135,7 @@ padding:15px;
 border-radius:8px;
 height:fit-content;
 border: 1px solid #444;
-box-shadow: 3px 3px 8px rgba(0,0,0,0.3);
+box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
 }
 
 .sessionPanel{
@@ -136,18 +146,19 @@ background:#282828;
 padding:15px;
 border-radius:8px;
 border: 1px solid #444;
-box-shadow: 3px 3px 8px rgba(0,0,0,0.3);
+box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
 }
 
 .deleteBtn{
-background-color: #8b0000;
+background: linear-gradient(to bottom, #c0392b, #a02c20); /* Darker red gradient */
 color: white;
-border: none;
+border: 1px solid #d64a3b;
 margin-left: 10px;
+text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
 
 .deleteBtn:hover {
-    background-color: #a00000;
+    background: linear-gradient(to bottom, #d64a3b, #b03a2e);
 }
 
 
@@ -161,7 +172,7 @@ margin-left: 10px;
     height: 100%; 
     overflow: auto; 
     background-color: rgb(0,0,0); 
-    background-color: rgba(0,0,0,0.6); /* Darker overlay */
+    background-color: rgba(0,0,0,0.7); /* Darker overlay */
 }
 
 .modal-content {
@@ -172,7 +183,7 @@ margin-left: 10px;
     width: 90%; 
     max-width: 500px;
     border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.7); /* More pronounced shadow */
 }
 
 .close {
@@ -180,6 +191,7 @@ margin-left: 10px;
     float: right;
     font-size: 28px;
     font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .close:hover,
