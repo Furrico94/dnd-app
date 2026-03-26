@@ -1,4 +1,3 @@
-
 body{
 font-family:Arial;
 background:#1e1e1e;
@@ -88,7 +87,7 @@ cursor:pointer;
 
 .pgLayout{
 display:grid;
-grid-template-columns: 1fr 350px;
+grid-template-columns: 1fr;
 gap:30px;
 }
 
@@ -100,10 +99,9 @@ height:fit-content;
 }
 
 .sessionPanel{
-position:fixed;
-right:20px;
-top:120px;
-width:300px;
+position:static;
+width:auto;
+margin-top:20px;
 background:#2b2b2b;
 padding:15px;
 border-radius:8px;
@@ -114,4 +112,116 @@ background-color: #c0392b;
 color: white;
 border: none;
 margin-left: 10px;
+}
+
+
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4); 
+}
+
+.modal-content {
+    background-color: #1e1e1e;
+    margin: 15% auto; 
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; 
+    max-width: 500px;
+    border-radius: 8px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.form-grid label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-grid input, .form-grid select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: white;
+}
+
+#edit-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+#edit-form-grid label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#edit-form-grid input, #edit-form-grid select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: white;
+}
+
+@media (min-width: 768px) {
+    .pgLayout{
+        grid-template-columns: 1fr 350px;
+    }
+
+    .sessionPanel{
+        position:fixed;
+        right:20px;
+        top:120px;
+        width:300px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    #edit-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .modal-content {
+        width: 80%;
+    }
+}
+
+@media (max-width: 480px) {
+    .statgrid {
+        grid-template-columns: 100px 50px 50px 70px;
+        gap: 5px;
+    }
 }
