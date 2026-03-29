@@ -65,6 +65,13 @@ const XP_LEVELS = [
     55000, 66000, 78000, 91000, 105000, 120000, 136000, 153000, 171000, 190000
 ];
 
+// Saving Throws - ability scores index (0=STR, 1=DEX, 2=CON, 3=INT, 4=WIS, 5=CHA)
+const SAVING_THROWS_CONFIG = {
+    "Tempra": 2,      // Costituzione
+    "Riflessi": 1,    // Destrezza
+    "Volontà": 4      // Saggezza
+};
+
 // ========================================================================
 // Application Logic
 // ========================================================================
@@ -146,6 +153,39 @@ function nuovoPG(){
         <div class="stat-name">Saggezza</div><div class="stat-value"><input type="number" oninput="calcMod(this)"></div><div class="stat-mod">0</div>
         <div class="stat-name">Carisma</div><div class="stat-value"><input type="number" oninput="calcMod(this)"></div><div class="stat-mod">0</div>
     </div>
+    <h3>Tiri Salvezza</h3>
+    <div style="overflow-x: auto;">
+    <table style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="background-color: #f0f0f0;">
+            <th style="border: 1px solid #ccc; padding: 8px;">Tiro Salvezza</th>
+            <th style="border: 1px solid #ccc; padding: 8px;">TS BASE</th>
+            <th style="border: 1px solid #ccc; padding: 8px;">Mod. Caratteristica</th>
+            <th style="border: 1px solid #ccc; padding: 8px;">ALTRO</th>
+            <th style="border: 1px solid #ccc; padding: 8px;">TOTALE</th>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px;"><b>Tempra</b> (COS)</td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><input type="number" class="st-base" data-st="Tempra" value="0"></td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><input type="number" class="st-mod" data-st="Tempra" disabled></td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><input type="number" class="st-altro" data-st="Tempra" value="0"></td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><span class="st-total" data-st="Tempra">0</span></td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px;"><b>Riflessi</b> (DES)</td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><input type="number" class="st-base" data-st="Riflessi" value="0"></td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><input type="number" class="st-mod" data-st="Riflessi" disabled></td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><input type="number" class="st-altro" data-st="Riflessi" value="0"></td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><span class="st-total" data-st="Riflessi">0</span></td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px;"><b>Volontà</b> (SAG)</td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><input type="number" class="st-base" data-st="Volontà" value="0"></td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><input type="number" class="st-mod" data-st="Volontà" disabled></td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><input type="number" class="st-altro" data-st="Volontà" value="0"></td>
+            <td style="border: 1px solid #ccc; padding: 8px;"><span class="st-total" data-st="Volontà">0</span></td>
+        </tr>
+    </table>
+    </div>    
     <h3>Punti Ferita</h3>
     PF Massimi<br><input id="pfmax" type="number"><br><br>
     <h3>Esperienza</h3>
@@ -153,6 +193,15 @@ function nuovoPG(){
     <button onclick="salvaPG()">💾 Salva</button>
     `;
     document.getElementById("app").innerHTML = html;
+    setTimeout(() => {
+        document.querySelectorAll(".statgrid input").forEach(input => {
+            if(input.value){
+                calcMod(input);
+            }
+        });
+        // Aggiungi event listeners per i tiri salvezza
+        document.querySelectorAll(".st-base, .st-altro").forEach(input => {input.addEventListener("input", () => aggiornaTotaleTiriSalvezza())});
+        aggiornaTotaleTiriSalvezza();}, 10);
 }
 
 function aggiungiClasse(){
@@ -172,6 +221,29 @@ function calcMod(input){
     } else {
         modDiv.textContent = mod;
     }
+}
+
+function aggiornaTotaleTiriSalvezza() {
+    const statValues = [];
+    document.querySelectorAll(".statgrid input").forEach(input => {
+        statValues.push(parseInt(input.value) || 0);
+    });
+    Object.keys(SAVING_THROWS_CONFIG).forEach(st => {
+        const statIndex = SAVING_THROWS_CONFIG[st];
+        const mod = Math.floor((statValues[statIndex] - 10) / 2);
+        
+        const modInput = document.querySelector(`.st-mod[data-st="${st}"]`);
+        const baseInput = document.querySelector(`.st-base[data-st="${st}"]`);
+        const altroInput = document.querySelector(`.st-altro[data-st="${st}"]`);
+        const totalSpan = document.querySelector(`.st-total[data-st="${st}"]`);
+        if (modInput) modInput.value = mod;
+            if (baseInput && altroInput && totalSpan) {
+            const base = parseInt(baseInput.value) || 0;
+            const altro = parseInt(altroInput.value) || 0;
+            const total = base + mod + altro;
+            totalSpan.textContent = total;
+            }
+    });
 }
 
 function salvaPG(){
@@ -218,10 +290,28 @@ function salvaPG(){
         }
         stats.push(statVal);
     }
+        // Raccogli i dati dei tiri salvezza dalla tabella
+    let savingThrows = {
+        "Tempra": { base: 0, altro: 0 },
+        "Riflessi": { base: 0, altro: 0 },
+        "Volontà": { base: 0, altro: 0 }
+    };
+    
+    Object.keys(savingThrows).forEach(st => {
+        const baseInput = document.querySelector(`.st-base[data-st="${st}"]`);
+        const altroInput = document.querySelector(`.st-altro[data-st="${st}"]`);
+        if (baseInput && altroInput) {
+            savingThrows[st].base = parseInt(baseInput.value) || 0;
+            savingThrows[st].altro = parseInt(altroInput.value) || 0;
+        }
+    });
+    
     let pg = {
         nome:nome.trim(), classi:classi, stats:stats, statsBase:[...stats], 
-        pfmax:pfmax, pf:pfmax, xpBase:xp, xp:xp, sessioni:[], ultimoAumentoStat:0
+        pfmax:pfmax, pf:pfmax, xpBase:xp, xp:xp, sessioni:[], ultimoAumentoStat:0,
+        savingThrows: savingThrows
     };
+
     party.push(pg);
     salva();
     menuPG();
@@ -242,6 +332,17 @@ function aumentoCaratteristica(livello, pg){
     return "<span style='color:gold;margin-left:10px;'>⬆ Aumento caratteristica disponibile</span>";
     }
 return "";
+}
+
+function calcolaTotaleTiriSalvezza(pg, tipoTS) {
+    if (!pg.savingThrows || !pg.savingThrows[tipoTS]) {
+        return 0;
+    }
+    const statIndex = SAVING_THROWS_CONFIG[tipoTS];
+    const mod = Math.floor((pg.stats[statIndex] - 10) / 2);
+    const base = pg.savingThrows[tipoTS].base || 0;
+    const altro = pg.savingThrows[tipoTS].altro || 0;
+    return base + mod + altro;
 }
 
 function apriPG(index){
@@ -273,6 +374,21 @@ function apriPG(index){
         <div class="stat-name">Intelligenza</div><div class="stat-value"><input type="number" value="${pg.stats[3]}" data-base="${pg.stats[3]}" oninput="gestioneStat(this,3)"></div><div class="stat-mod">${((Math.floor((pg.stats[3]-10)/2)>=0?"+":"") + Math.floor((pg.stats[3]-10)/2))}</div><div class="statbtn">${aumentoDisponibile ? `<button onclick="modStat(3, -1)">➖</button><button onclick="modStat(3, +1)">➕</button>` : ``}</div>
         <div class="stat-name">Saggezza</div><div class="stat-value"><input type="number" value="${pg.stats[4]}" data-base="${pg.stats[4]}" oninput="gestioneStat(this,4)"></div><div class="stat-mod">${((Math.floor((pg.stats[4]-10)/2)>=0?"+":"") + Math.floor((pg.stats[4]-10)/2))}</div><div class="statbtn">${aumentoDisponibile ? `<button onclick="modStat(4, -1)">➖</button><button onclick="modStat(4, +1)">➕</button>` : ``}</div>
         <div class="stat-name">Carisma</div><div class="stat-value"><input type="number" value="${pg.stats[5]}" data-base="${pg.stats[5]}" oninput="gestioneStat(this,5)"></div><div class="stat-mod">${((Math.floor((pg.stats[5]-10)/2)>=0?"+":"") + Math.floor((pg.stats[5]-10)/2))}</div><div class="statbtn">${aumentoDisponibile ? `<button onclick="modStat(5, -1)">➖</button><button onclick="modStat(5, +1)">➕</button>` : ``}</div>
+    </div>
+    <h3>Tiri Salvezza</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <div style="text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <b>Tempra</b><br>
+            <span style="font-size: 24px; font-weight: bold;">${calcolaTotaleTiriSalvezza(pg, 'Tempra')}</span>
+        </div>
+        <div style="text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <b>Riflessi</b><br>
+            <span style="font-size: 24px; font-weight: bold;">${calcolaTotaleTiriSalvezza(pg, 'Riflessi')}</span>
+        </div>
+        <div style="text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <b>Volontà</b><br>
+            <span style="font-size: 24px; font-weight: bold;">${calcolaTotaleTiriSalvezza(pg, 'Volontà')}</span>
+        </div>
     </div>
     <h3>Punti Ferita</h3>
     PF Massimi<br><input id="pfmax" type="number" value="${pg.pfmax}" disabled><br><br>
@@ -452,7 +568,6 @@ function gestioneStat(input,index){
 
 function pannelloLevelUp(index, livello){
     let pg=party[index];
-    //reset stato level up
     pg.levelUpMode = null;
     pg.selectedClassIndex = null;
     
@@ -462,6 +577,48 @@ function pannelloLevelUp(index, livello){
     <br><br>
     <h3>Punti Ferita guadagnati</h3>
     <input id="pfLevelUp" type="number" placeholder="da 1 a 20">
+    <br><br>
+    <h3>Tiri Salvezza</h3>
+    <table style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="background-color: #f0f0f0;">
+            <th style="border: 1px solid #ccc; padding: 8px;">Tiro Salvezza</th>
+            <th style="border: 1px solid #ccc; padding: 8px;">TS BASE</th>
+            <th style="border: 1px solid #ccc; padding: 8px;">ALTRO</th>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px;"><b>Tempra</b></td>
+            <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">
+                <button onclick="modificaTSBase(${index}, 'Tempra', -1)" style="width: 30px;">−</button>
+                <input id="tsBase-Tempra" type="number" value="${pg.savingThrows.Tempra.base}" style="width: 50px; text-align: center; margin: 0 5px;" readonly>
+                <button onclick="modificaTSBase(${index}, 'Tempra', 1)" style="width: 30px;">+</button>
+            </td>
+            <td style="border: 1px solid #ccc; padding: 8px;">
+                <input id="tsAltro-Tempra" type="number" value="${pg.savingThrows.Tempra.altro}" style="width: 100%;">
+            </td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px;"><b>Riflessi</b></td>
+            <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">
+                <button onclick="modificaTSBase(${index}, 'Riflessi', -1)" style="width: 30px;">−</button>
+                <input id="tsBase-Riflessi" type="number" value="${pg.savingThrows.Riflessi.base}" style="width: 50px; text-align: center; margin: 0 5px;" readonly>
+                <button onclick="modificaTSBase(${index}, 'Riflessi', 1)" style="width: 30px;">+</button>
+            </td>
+            <td style="border: 1px solid #ccc; padding: 8px;">
+                <input id="tsAltro-Riflessi" type="number" value="${pg.savingThrows.Riflessi.altro}" style="width: 100%;">
+            </td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px;"><b>Volontà</b></td>
+            <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">
+                <button onclick="modificaTSBase(${index}, 'Volontà', -1)" style="width: 30px;">−</button>
+                <input id="tsBase-Volontà" type="number" value="${pg.savingThrows.Volontà.base}" style="width: 50px; text-align: center; margin: 0 5px;" readonly>
+                <button onclick="modificaTSBase(${index}, 'Volontà', 1)" style="width: 30px;">+</button>
+            </td>
+            <td style="border: 1px solid #ccc; padding: 8px;">
+                <input id="tsAltro-Volontà" type="number" value="${pg.savingThrows.Volontà.altro}" style="width: 100%;">
+            </td>
+        </tr>
+    </table>
     <br><br>
     <h3>Scelta Classe</h3>
     <div id="sceltaClasse">
@@ -473,6 +630,15 @@ function pannelloLevelUp(index, livello){
     <button onclick="confermaLevelUp(${index})">✅ Conferma Level Up</button>
     `;
     document.getElementById("app").innerHTML = html;
+}
+
+function modificaTSBase(index, tipoTS, delta) {
+    let pg = party[index];
+    pg.savingThrows[tipoTS].base += delta;
+    if (pg.savingThrows[tipoTS].base < 0) {
+        pg.savingThrows[tipoTS].base = 0;
+    }
+    pannelloLevelUp(index, livelloDaXP(pg.xp));
 }
 
 function mostraClassi(index){
@@ -509,39 +675,50 @@ function mostraNuovaClasse(index){
 function confermaLevelUp(index){
     let pg = party[index];
     let pfGain = parseInt(document.getElementById("pfLevelUp").value);
+    
     // VALIDAZIONE PF
     if(isNaN(pfGain) || pfGain < 1 || pfGain > 20){
-        alert("I PF devono essere un numero tra 1 e 20"); //ho messo questo limite perché non penso che con un livello uno possa acquisire più di 20 pf, per ora il DV più alto è il barbaro con il d12 e per arrivare a 20 dovrebbe avere COS 26... 
-    return;
+        alert("I PF devono essere un numero tra 1 e 20");
+        return;
     }
+    
     // VALIDAZIONE SCELTA
     if(!pg.levelUpMode){
         alert("Devi scegliere una modalità (classe esistente o nuova)");
-    return;
+        return;
     }
+    
+    // Salva i tiri salvezza aggiornati
+    pg.savingThrows.Tempra.altro = parseInt(document.getElementById("tsAltro-Tempra").value) || 0;
+    pg.savingThrows.Riflessi.altro = parseInt(document.getElementById("tsAltro-Riflessi").value) || 0;
+    pg.savingThrows.Volontà.altro = parseInt(document.getElementById("tsAltro-Volontà").value) || 0;
+    
     // CASO CLASSE ESISTENTE
     if(pg.levelUpMode === "existing"){
         if(pg.selectedClassIndex === null){
             alert("Seleziona una classe");
-        return;
+            return;
         }
-    pg.classi[pg.selectedClassIndex].livello += 1;
+        pg.classi[pg.selectedClassIndex].livello += 1;
     }
+    
     // CASO NUOVA CLASSE
     if(pg.levelUpMode === "new"){
         let nome = document.getElementById("nuovaClasseNome")?.value;
         if(!nome || nome.trim() === ""){
             alert("Inserisci il nome della nuova classe");
-        return;
+            return;
         }
         pg.classi.push({
-        nome:nome.trim(),
-        livello:1
+            nome:nome.trim(),
+            livello:1
         });
     }
+    
     // AGGIUNTA PF
     pg.pfmax += pfGain;
     pg.pf += pfGain;
+    
     // PULIZIA
     pg.levelUpMode = null;
     pg.selectedClassIndex = null;
