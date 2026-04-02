@@ -133,12 +133,24 @@ function nuovoPG(){
     let html = `
     <h2>Nuovo Personaggio</h2>
     Nome<br><input id="nome"><br><br>
+    Razza<br>
+    <select id="razza">
+        <option value="">Seleziona una razza</option>
+        <option value="Umano">Umano</option>
+        <option value="Nano">Nano</option>
+        <option value="Elfo">Elfo</option>
+        <option value="Gnomo">Gnomo</option>
+        <option value="Mezzorco">Mezzorco</option>
+        <option value="Mezzelfo">Mezzelfo</option>
+        <option value="Halfling">Halfling</option>
+    </select><br><br>
     <h3>Classi</h3>
     <div id="classi">
-        <div>
-            <input placeholder="Classe" class="classe">
-            <input type="number" placeholder="Livello" class="livello">
-        </div>
+    <div>
+        <input placeholder="Classe" class="classe">
+        <input type="number" placeholder="Livello" class="livello">
+        <input type="number" placeholder="Skill Points/Lvl" class="skillpoints">
+     </div>
     </div>
     <button onclick="aggiungiClasse()">+ Classe</button>
     <h3>Caratteristiche</h3>
@@ -207,7 +219,7 @@ function nuovoPG(){
 function aggiungiClasse(){
     let div = document.getElementById("classi");
     let nuovo = document.createElement("div");
-    nuovo.innerHTML = `<input placeholder="Classe" class="classe"><input type="number" placeholder="Livello" class="livello">`;
+    nuovo.innerHTML = `<input placeholder="Classe" class="classe"><input type="number" placeholder="Livello" class="livello"><input type="number" placeholder="Skill Points/Lvl" class="skillpoints">`;
     div.appendChild(nuovo);
 }
 
@@ -254,12 +266,14 @@ function salvaPG(){
     }
     let classInputs = document.querySelectorAll(".classe");
     let levelInputs = document.querySelectorAll(".livello");
+    let skillpointsInputs = document.querySelectorAll(".skillpoints");
     let classi = [];
     for(let i=0;i<classInputs.length;i++){
         let c = classInputs[i].value.trim();
         let l = parseInt(levelInputs[i].value);
+        let sp = parseInt(skillpointsInputs[i].value) || 0;
         if(c && l > 0){
-            classi.push({nome:c, livello:l});
+        classi.push({nome:c, livello:l, skillpointsPerLvl:sp});
         } else if (c || levelInputs[i].value) {
             alert(`La riga classe ${i+1} non è compilata correttamente.`);
             return;
@@ -305,9 +319,9 @@ function salvaPG(){
             savingThrows[st].altro = parseInt(altroInput.value) || 0;
         }
     });
-    
+    let razza = document.getElementById("razza").value;
     let pg = {
-        nome:nome.trim(), classi:classi, stats:stats, statsBase:[...stats], 
+        nome:nome.trim(), razza:razza, classi:classi, stats:stats, statsBase:[...stats], 
         pfmax:pfmax, pf:pfmax, xpBase:xp, xp:xp, sessioni:[], ultimoAumentoStat:0,
         savingThrows: savingThrows
     };
