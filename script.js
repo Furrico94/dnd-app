@@ -408,9 +408,6 @@ function apriPG(index){
     </div>
     <h3>Punti Ferita</h3>
     PF Massimi<br><input id="pfmax" type="number" value="${pg.pfmax}" disabled><br><br>
-    <button id="salvaBtn" onclick="modificaPG(${index})">💾 Salva modifiche</button>
-    <button class="deleteBtn" onclick="eliminaPG(${index})">🗑️ Elimina</button>
-    <span id="statMsg" style="margin-left:10px;color:orange;font-weight:bold;"></span>
     <div class="sessionPanel">
         <h3>Esperienza</h3>
         <div id="xpText">${pg.xp} / ${xpNext}</div>
@@ -421,6 +418,11 @@ function apriPG(index){
         <th>Sessione</th><th>PX</th><th>Totale</th></tr></table>
         <button onclick="nuovaSessione(${index})">➕ Nuova sessione</button>
     </div>
+    <hr style="margin:20 px 0;">
+    <br>
+    <button id="salvaBtn" onclick="modificaPG(${index})">💾 Salva modifiche</button>
+    <button class="deleteBtn" onclick="eliminaPG(${index})">🗑️ Elimina</button>
+    <span id="statMsg" style="margin-left:10px;color:orange;font-weight:bold;"></span>
     <br><br>
     `;
     document.getElementById("app").innerHTML = html;
