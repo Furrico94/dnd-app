@@ -251,10 +251,8 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     }
 
     .sessionPanel{
-        position:fixed;
-        right:20px;
-        top:120px;
-        width:300px;
+        position:static;
+        width:auto;
     }
 
     .form-grid {
