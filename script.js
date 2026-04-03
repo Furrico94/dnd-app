@@ -117,6 +117,7 @@ function menuPG(){
         html += `
         <div class="card" onclick="apriPG(${i})">
             <b>${pg.nome} (Lv ${livelloTot})</b><br>
+            Razza: ${pg.razza || "-"}<br>
             ${classi}
             <br><br>
             ${pg.pf}/${pg.pfmax}
@@ -376,6 +377,7 @@ function apriPG(index){
     }
     let html = `
     <h2>${pg.nome}</h2>
+    <div><b>Razza:</b> ${pg.razza || "-"}</div>
     <div>Livello totale <span id="livelloTotale">${livelloTot}</span></div>
     <h3>Classi</h3>
     <div id="classi">${classiHTML}</div>
