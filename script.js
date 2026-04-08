@@ -59,6 +59,8 @@ async function promptForPassphrase(storedHash) {
 
 let party = [];
 let statBonusUsato = -1;
+let skillsTemp = {};
+let skillPointsDisponibili = 0;
 
 const XP_LEVELS = [
     0, 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000, 
@@ -70,6 +72,16 @@ const SAVING_THROWS_CONFIG = {
     "Tempra": 2,      // Costituzione
     "Riflessi": 1,    // Destrezza
     "Volontà": 4      // Saggezza
+};
+
+const SKILLS_CONFIG = {
+    "Acrobazia": { stat: 1, label: "DES" },
+    "Artigianato": { stat: 3, label: "INT" },
+    "Concentrazione": { stat: 2, label: "COS" },
+    "Diplomazia": { stat: 5, label: "CHA" },
+    "Furtività": { stat: 1, label: "DES" },
+    "Percezione": { stat: 4, label: "SAG" },
+    "Raggirare": { stat: 5, label: "CHA" }
 };
 
 // ========================================================================
@@ -166,6 +178,10 @@ function nuovoPG(){
         <div class="stat-name">Saggezza</div><div class="stat-value"><input type="number" oninput="calcMod(this)"></div><div class="stat-mod">0</div>
         <div class="stat-name">Carisma</div><div class="stat-value"><input type="number" oninput="calcMod(this)"></div><div class="stat-mod">0</div>
     </div>
+    <h3>Punti Ferita</h3>
+    PF Massimi<br><input id="pfmax" type="number"><br><br>
+    <h3>Esperienza</h3>
+    XP Totali<br><input id="xp" type="number" value="0"><br><br>
     <h3>Tiri Salvezza</h3>
     <div style="overflow-x: auto;">
     <table style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -199,22 +215,26 @@ function nuovoPG(){
         </tr>
     </table>
     </div>    
-    <h3>Punti Ferita</h3>
-    PF Massimi<br><input id="pfmax" type="number"><br><br>
-    <h3>Esperienza</h3>
-    XP Totali<br><input id="xp" type="number" value="0"><br><br>
+    <h3>Abilità</h3>
+    <div>
+    Punti abilità disponibili: <span id="skillPointsDisponibili">0</span>
+    </div>
+    <div id="skillsTable"></div>
     <button onclick="salvaPG()">💾 Salva</button>
     `;
     document.getElementById("app").innerHTML = html;
     setTimeout(() => {
-        document.querySelectorAll(".statgrid input").forEach(input => {
-            if(input.value){
-                calcMod(input);
-            }
-        });
-        // Aggiungi event listeners per i tiri salvezza
-        document.querySelectorAll(".st-base, .st-altro").forEach(input => {input.addEventListener("input", () => aggiornaTotaleTiriSalvezza())});
-        aggiornaTotaleTiriSalvezza();}, 10);
+    document.querySelectorAll(".statgrid input").forEach(input => {
+        if(input.value){
+            calcMod(input);
+        }
+    });
+    generaSkillsTable();
+    aggiornaSkillPointsNewPG();
+    document.querySelectorAll(".st-base, .st-altro").forEach(input => {
+        input.addEventListener("input", () => aggiornaTotaleTiriSalvezza())
+    });
+    aggiornaTotaleTiriSalvezza();}, 10);
 }
 
 function aggiungiClasse(){
@@ -257,6 +277,107 @@ function aggiornaTotaleTiriSalvezza() {
             totalSpan.textContent = total;
             }
     });
+}
+
+function generaSkillsTable(){
+    let container = document.getElementById("skillsTable");
+
+    let html = `
+    <div class="skills-row skills-header">
+        <div>Classe</div>
+        <div>Abilità</div>
+        <div>Caratt</div>
+        <div>Gradi</div>
+        <div>+</div>
+        <div>-</div>
+    </div>
+    `;
+
+    Object.keys(SKILLS_CONFIG).forEach(skill => {
+
+        if(!skillsTemp[skill]){
+            skillsTemp[skill] = {gradi:0, classe:false};
+        }
+
+        html += `
+        <div class="skills-row">
+            <div>
+                <input type="checkbox" 
+                       onchange="toggleClasse('${skill}', this.checked)">
+            </div>
+            <div>${skill}</div>
+            <div>${SKILLS_CONFIG[skill].label}</div>
+            <div id="gradi-${skill}">0</div>
+            <div><button onclick="modSkill('${skill}', 1)">+</button></div>
+            <div><button onclick="modSkill('${skill}', -1)">-</button></div>
+        </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function toggleClasse(skill, value){
+    skillsTemp[skill].classe = value;
+}
+
+function aggiornaSkillPointsNewPG(){
+    let stats = [];
+    document.querySelectorAll(".statgrid input").forEach(i => {
+        stats.push(parseInt(i.value) || 0);
+    });
+
+    let modInt = Math.floor((stats[3] - 10) / 2);
+    let razza = document.getElementById("razza").value;
+    let bonusUmano = razza === "Umano" ? 1 : 0;
+
+    let classInputs = document.querySelectorAll(".classe");
+    let levelInputs = document.querySelectorAll(".livello");
+    let spInputs = document.querySelectorAll(".skillpoints");
+
+    let totale = 0;
+
+    if(classInputs.length > 0){
+        let sp = parseInt(spInputs[0].value) || 0;
+        totale += (sp + modInt + bonusUmano) * 4;
+
+        let lvl = parseInt(levelInputs[0].value) || 1;
+        totale += (lvl - 1) * (sp + modInt + bonusUmano);
+
+        for(let i=1;i<classInputs.length;i++){
+            let sp2 = parseInt(spInputs[i].value) || 0;
+            let lvl2 = parseInt(levelInputs[i].value) || 0;
+
+            totale += lvl2 * (sp2 + modInt + bonusUmano);
+        }
+    }
+
+    skillPointsDisponibili = totale;
+
+    document.getElementById("skillPointsDisponibili").innerText = totale;
+}
+
+function modSkill(skill, delta){
+    let s = skillsTemp[skill];
+
+    let costo = s.classe ? 1 : 2;
+
+    if(delta > 0){
+        if(skillPointsDisponibili < costo) return;
+
+        s.gradi += 1;
+        skillPointsDisponibili -= costo;
+    }
+
+    if(delta < 0){
+        if(s.gradi <= 0) return;
+
+        s.gradi -= 1;
+        skillPointsDisponibili += costo;
+    }
+
+    document.getElementById(`gradi-${skill}`).innerText = s.gradi;
+    document.getElementById("skillPointsDisponibili").innerText = skillPointsDisponibili;
 }
 
 function salvaPG(){
