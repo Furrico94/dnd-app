@@ -223,11 +223,29 @@ function nuovoPG(){
     <button onclick="salvaPG()">💾 Salva</button>
     `;
     document.getElementById("app").innerHTML = html;
+    skillsTemp = {};
+    skillPointsDisponibili = 0;
     setTimeout(() => {
     document.querySelectorAll(".statgrid input").forEach(input => {
         if(input.value){
             calcMod(input);
         }
+    });
+        // aggiorna punti abilità quando cambi INT
+    document.querySelectorAll(".statgrid input").forEach(input => {
+    input.addEventListener("input", aggiornaSkillPointsNewPG);
+    });
+
+    // aggiorna quando cambi razza
+    document.getElementById("razza").addEventListener("change", aggiornaSkillPointsNewPG);
+
+    // aggiorna quando cambi classi/livelli/SP
+    document.addEventListener("input", (e) => {
+    if(e.target.classList.contains("classe") ||
+       e.target.classList.contains("livello") ||
+       e.target.classList.contains("skillpoints")){
+        aggiornaSkillPointsNewPG();
+    }
     });
     generaSkillsTable();
     aggiornaSkillPointsNewPG();
@@ -366,9 +384,18 @@ function aggiornaSkillPointsNewPG(){
         }
     }
 
-    skillPointsDisponibili = totale;
+    let puntiSpesi = 0;
+
+    Object.values(skillsTemp).forEach(s => {
+    if(s.gradi){
+        puntiSpesi += s.gradi * (s.classe ? 1 : 2);
+        }
+    });
+
+    skillPointsDisponibili = totale - puntiSpesi;
 
     document.getElementById("skillPointsDisponibili").innerText = totale;
+    console.log("Totale:", totale, "Spesi:", puntiSpesi, "Disponibili:", skillPointsDisponibili);
 }
 
 function modSkill(skill, delta){
