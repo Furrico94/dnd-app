@@ -568,7 +568,10 @@ function apriPG(index){
         classiHTML += `<div><span>${pg.classi[i].nome}</span> <span>${"Lv"}</span> <span>${pg.classi[i].livello}</span></div>`;
     }
     let html = `
+    <div class="pg-header">
     <h2>${pg.nome}</h2>
+    <button class="btn-skill" onclick="apriAbilita(${index})">📚</button>
+    </div>
     <div><b>Razza:</b> ${pg.razza || "-"}</div>
     <div>Livello totale <span id="livelloTotale">${livelloTot}</span></div>
     <h3>Classi</h3>
@@ -598,7 +601,6 @@ function apriPG(index){
             <span style="font-size: 24px; font-weight: bold;">${calcolaTotaleTiriSalvezza(pg, 'Volontà')}</span>
         </div>
     </div>
-    <button onclick="apriAbilita(${index})">📚 Abilità</button>
     <h3>Punti Ferita</h3>
     PF Massimi<br><input id="pfmax" type="number" value="${pg.pfmax}" disabled><br><br>
     <div class="sessionPanel">
