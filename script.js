@@ -60,6 +60,7 @@ async function promptForPassphrase(storedHash) {
 let party = [];
 let statBonusUsato = -1;
 let skillsTemp = {};
+let levelUpTemp = {};
 let skillPointsDisponibili = 0;
 
 const XP_LEVELS = [
@@ -926,9 +927,132 @@ function pannelloLevelUp(index, livello){
     <button onclick="mostraNuovaClasse(${index})">Nuova classe</button>
     </div>
     <br><br>
-    <button onclick="confermaLevelUp(${index})">✅ Conferma Level Up</button>
+    <button onclick="vaiASkillsLevelUp(${index})">➡️ Continua</button>
     `;
     document.getElementById("app").innerHTML = html;
+}
+
+function vaiASkillsLevelUp(index){
+    let pg = party[index];
+    // recupera classe scelta (ultima)
+    let classe = pg.classi[pg.classi.length - 1];
+    let modInt = Math.floor((pg.stats[3] - 10) / 2);
+    let bonusUmano = pg.razza === "Umano" ? 1 : 0;
+    let punti = classe.skillpointsPerLvl + modInt + bonusUmano;
+    // stato temporaneo
+    levelUpTemp = {
+        puntiDisponibili: punti,
+        skills: JSON.parse(JSON.stringify(pg.skills))
+    };
+    schermataSkillsLevelUp(index);
+}
+
+function schermataSkillsLevelUp(index){
+    let html = `
+    <h2>Distribuisci Abilità</h2>
+    <div>
+        Punti disponibili: <span id="puntiLvlUp">${levelUpTemp.puntiDisponibili}</span>
+    </div>
+    <div class="skills-row skills-header">
+        <div>Classe</div>
+        <div>Abilità</div>
+        <div>Gradi</div>
+        <div>+</div>
+        <div>-</div>
+    </div>
+    `;
+    Object.keys(SKILLS_CONFIG).forEach(skill => {
+    let s = levelUpTemp.skills[skill] || {gradi:0, classe:false};
+    let checked = s.classe ? "checked" : "";
+    let disabled = s.classe ? "disabled" : "";
+    html += `
+    <div class="skills-row">
+        <div>
+            <input type="checkbox"
+                ${checked}
+                ${disabled}
+                onchange="toggleClasseLevelUp(${index}, '${skill}', this.checked)">
+        </div>
+        <div>${skill}</div>
+        <div id="lvl-gradi-${skill}">${s.gradi}</div>
+        <div><button onclick="modSkillLevelUp(${index}, '${skill}', 1)">+</button></div>
+        <div><button onclick="modSkillLevelUp(${index}, '${skill}', -1)">-</button></div>
+    </div>
+    `;
+    });
+    html += `</div>`;
+    html += `
+    <button onclick="confermaLevelUpFinale(${index})">✅ Conferma Level Up</button>
+    `;
+    document.getElementById("app").innerHTML = html;
+}
+
+function modSkillLevelUp(index, skill, delta){
+    let s = levelUpTemp.skills[skill];
+    if(!s){
+        s = {gradi:0, classe:false};
+        levelUpTemp.skills[skill] = s;
+    }
+    let costo = s.classe ? 1 : 2;
+    if(delta > 0){
+    let pg = party.find(p => p.skills === undefined ? false : true);
+    let max = maxGradiLivello(pg, skill);
+    if(s.gradi >= max) return;
+    if(levelUpTemp.puntiDisponibili < costo) return;
+    s.gradi += 1;
+    levelUpTemp.puntiDisponibili -= costo;
+    }
+    if(delta < 0){
+        if(s.gradi <= 0) return;
+        s.gradi -= 1;
+        levelUpTemp.puntiDisponibili += costo;
+    }
+    document.getElementById(`lvl-gradi-${skill}`).innerText = s.gradi;
+    document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
+}
+
+function toggleClasseLevelUp(index, skill, value){
+    let pg = party[index];
+    let s = levelUpTemp.skills[skill];
+    if(!s){
+        s = {gradi:0, classe:false};
+        levelUpTemp.skills[skill] = s;
+    }
+    if(s.classe) return;
+    s.classe = value;
+    let max = maxGradiLivello(pg, skill);
+    if(s.gradi > max){
+        let diff = s.gradi - max;
+        let costo = value ? 1 : 2;
+        s.gradi = max;
+        levelUpTemp.puntiDisponibili += diff * costo;
+        document.getElementById(`lvl-gradi-${skill}`).innerText = max;
+        document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
+    }
+}
+
+function maxGradiLivello(pg, skill){
+    let livelloTot = 0;
+    pg.classi.forEach(c => {
+        livelloTot += c.livello;
+    });
+    livelloTot += 1;
+    let isClasse = levelUpTemp.skills[skill]?.classe;
+    if(isClasse){
+        return livelloTot + 3;
+    } else {
+        return Math.floor((livelloTot + 3) / 2);
+    }
+}
+
+function confermaLevelUpFinale(index){
+    if(levelUpTemp.puntiDisponibili > 0){
+        alert("Devi spendere tutti i punti abilità!");
+        return;
+    }
+    let pg = party[index];
+    pg.skills = levelUpTemp.skills;
+    confermaLevelUp(index);
 }
 
 function modificaTSBase(index, tipoTS, delta) {
