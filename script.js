@@ -570,7 +570,7 @@ function apriPG(index){
     let html = `
     <div class="pg-header">
     <h2>${pg.nome}</h2>
-    <button class="btn-skill" onclick="apriAbilita(${index})">📚</button>
+    <button class="btn-skill" onclick="apriAbilita(${index})">📚 Abilità</button>
     </div>
     <div><b>Razza:</b> ${pg.razza || "-"}</div>
     <div>Livello totale <span id="livelloTotale">${livelloTot}</span></div>
