@@ -330,5 +330,9 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 
 .btn-skill{
     font-size:20px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
     border-radius:8px;
+    gap: 6px;
 }
