@@ -319,6 +319,20 @@ function generaSkillsTable(){
 
 function toggleClasse(skill, value){
     skillsTemp[skill].classe = value;
+
+    let max = maxGradiConsentiti(skill);
+
+    if(skillsTemp[skill].gradi > max){
+        let diff = skillsTemp[skill].gradi - max;
+
+        let costo = value ? 1 : 2;
+
+        skillsTemp[skill].gradi = max;
+        skillPointsDisponibili += diff * costo;
+
+        document.getElementById(`gradi-${skill}`).innerText = max;
+        document.getElementById("skillPointsDisponibili").innerText = skillPointsDisponibili;
+    }
 }
 
 function aggiornaSkillPointsNewPG(){
@@ -363,10 +377,13 @@ function modSkill(skill, delta){
     let costo = s.classe ? 1 : 2;
 
     if(delta > 0){
-        if(skillPointsDisponibili < costo) return;
+    let max = maxGradiConsentiti(skill);
 
-        s.gradi += 1;
-        skillPointsDisponibili -= costo;
+    if(s.gradi >= max) return;
+    if(skillPointsDisponibili < costo) return;
+
+    s.gradi += 1;
+    skillPointsDisponibili -= costo;
     }
 
     if(delta < 0){
@@ -378,6 +395,23 @@ function modSkill(skill, delta){
 
     document.getElementById(`gradi-${skill}`).innerText = s.gradi;
     document.getElementById("skillPointsDisponibili").innerText = skillPointsDisponibili;
+}
+
+function maxGradiConsentiti(skill){
+    let livelloTot = 0;
+
+    let levelInputs = document.querySelectorAll(".livello");
+    levelInputs.forEach(inp => {
+        livelloTot += parseInt(inp.value) || 0;
+    });
+
+    let isClasse = skillsTemp[skill]?.classe;
+
+    if(isClasse){
+        return livelloTot + 3;
+    } else {
+        return Math.floor((livelloTot + 3) / 2);
+    }
 }
 
 function salvaPG(){
@@ -442,14 +476,24 @@ function salvaPG(){
         }
     });
     let razza = document.getElementById("razza").value;
+    let skills = {};
+    Object.keys(SKILLS_CONFIG).forEach(skill => {
+    skills[skill] = {
+        gradi: skillsTemp[skill]?.gradi || 0,
+        altro: 0,
+        classe: skillsTemp[skill]?.classe || false
+        };
+    });
     let pg = {
         nome:nome.trim(), razza:razza, classi:classi, stats:stats, statsBase:[...stats], 
         pfmax:pfmax, pf:pfmax, xpBase:xp, xp:xp, sessioni:[], ultimoAumentoStat:0,
-        savingThrows: savingThrows
+        savingThrows: savingThrows, skills: skills
     };
 
     party.push(pg);
     salva();
+    skillsTemp = {};
+    skillPointsDisponibili = 0;
     menuPG();
 }
 
@@ -527,6 +571,7 @@ function apriPG(index){
             <span style="font-size: 24px; font-weight: bold;">${calcolaTotaleTiriSalvezza(pg, 'Volontà')}</span>
         </div>
     </div>
+    <button onclick="apriAbilita(${index})">📚 Abilità</button>
     <h3>Punti Ferita</h3>
     PF Massimi<br><input id="pfmax" type="number" value="${pg.pfmax}" disabled><br><br>
     <div class="sessionPanel">
@@ -581,6 +626,53 @@ function apriPG(index){
             c3.innerText = totale;
         }
     }
+}
+
+function apriAbilita(index){
+    let pg = party[index];
+
+    let html = `
+    <h2>Abilità - ${pg.nome}</h2>
+
+    <div class="skills-table">
+        <div class="skills-row skills-header">
+            <div>Abilità</div>
+            <div>Tot</div>
+            <div>Caratt</div>
+            <div>Gradi</div>
+            <div>Altro</div>
+        </div>
+    `;
+        Object.keys(SKILLS_CONFIG).forEach(skill => {
+
+        let config = SKILLS_CONFIG[skill];
+
+        let mod = Math.floor((pg.stats[config.stat] - 10) / 2);
+        let modFormatted = mod >= 0 ? "+" + mod : mod;
+
+        let gradi = pg.skills?.[skill]?.gradi || 0;
+        let altro = pg.skills?.[skill]?.altro || 0;
+
+        let totale = gradi + mod + altro;
+        let totFormatted = totale >= 0 ? "+" + totale : totale;
+
+        html += `
+        <div class="skills-row">
+            <div class="skill-main"><b>${skill}</b></div>
+            <div class="skill-main"><b>${totFormatted}</b></div>
+            <div class="skill-muted">${modFormatted}</div>
+            <div class="skill-muted">${gradi}</div>
+            <div class="skill-muted">${altro}</div>
+        </div>
+        `;
+    });
+        html += `</div>`;
+
+    html += `
+    <button class="back-btn" onclick="apriPG(${index})">⬅ Torna</button>
+    `;
+
+    document.getElementById("app").innerHTML = html;
 }
 
 function eliminaPG(index) {
