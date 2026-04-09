@@ -293,11 +293,15 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     align-items:center;
 }
 
-.skills-row div:not(:first-child){
-    text-align: center;
+.skills-edit{
+    grid-template-columns: 1fr 5fr 1fr 1fr 1fr 1fr;
 }
 
-.skills-row div: nth-child(2),
+.skills-view{
+    grid-template-columns: 5fr 1fr 1fr 1fr 1fr;
+}
+
+.skills-row div:nth-child(2),
 .skills-view div:nth-child(1){
     text-align: left;
     justify-self: start;
@@ -305,21 +309,24 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     font-size: 16px;
 }
 
-.skills-row div{
+.skills-edit div:nth-child(n+3){
     text-align: center;
     justify-self: center;
-    width: 100%;
-    padding: 4px 6px;
 }
 
-.skills-edit input[type="checkbox"]{
-    margin: 0 auto;
-    display: block;
+.skills-view div:nth-child(n+2){
+    text-align: center;
+    justify-self: center;
 }
 
 .skills-row input[type="checkbox"]{
     margin: 0 auto;
     display: block;
+}
+
+.skills-row div{
+    width: 100%;
+    padding: 4px 6px;
 }
 
 .skills-header{
@@ -330,7 +337,9 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 .skills-header div{
     text-align: center;
 }
-.skills-header div:nth-child(2){
+
+.skills-header.skills-edit div:nth-child(2),
+.skills-header.skills-view div:nth-child(1){
     text-align: left;
 }
 
@@ -339,14 +348,6 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     flex-direction:column;
     gap:5px;
     margin-top:30px;
-}
-
-.skills-edit{
-    grid-template-columns: 1fr 5fr 1fr 1fr 1fr 1fr;
-}
-
-.skills-view{
-    grid-template-columns: 5fr 1fr 1fr 1fr 1fr;
 }
 
 .skill-main{
