@@ -340,7 +340,7 @@ function generaSkillsTable(){
     let container = document.getElementById("skillsTable");
 
     let html = `
-    <div class="skills-row skills-header">
+    <div class="skills-row skills-header skills-edit">
         <div>Classe</div>
         <div>Abilità</div>
         <div>Caratt</div>
@@ -357,7 +357,7 @@ function generaSkillsTable(){
         }
 
         html += `
-        <div class="skills-row">
+        <div class="skills-row skills-edit">
             <div>
                 <input type="checkbox" 
                        onchange="toggleClasse('${skill}', this.checked)">
@@ -703,7 +703,7 @@ function apriAbilita(index){
     <h2>Abilità - ${pg.nome}</h2>
 
     <div class="skills-table">
-        <div class="skills-row skills-header">
+        <div class="skills-row skills-header skills-view">
             <div>Abilità</div>
             <div>Tot</div>
             <div>Caratt</div>
@@ -725,7 +725,7 @@ function apriAbilita(index){
         let totFormatted = totale >= 0 ? "+" + totale : totale;
 
         html += `
-        <div class="skills-row">
+        <div class="skills-row skills-view">
             <div class="skill-main"><b>${skill}</b></div>
             <div class="skill-main"><b>${totFormatted}</b></div>
             <div class="skill-muted">${modFormatted}</div>
