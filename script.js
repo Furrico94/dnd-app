@@ -98,7 +98,6 @@ const SKILLS_CONFIG = {
     "Decifrare Scritture": { stat: 3, label: "INT" },
     "Diplomazia": { stat: 5, label: "CHA" },
     "Disattivare Congegni": { stat: 3, label: "INT" },
-    "Empatia Animale": { stat: 5, label: "CHA" },
     "Equilibrio": { stat: 1, label: "DES" },
     "Falsificare": { stat: 3, label: "INT" },
     "Furtività": { stat: 1, label: "DES" },
