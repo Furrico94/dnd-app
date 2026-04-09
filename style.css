@@ -297,21 +297,24 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     text-align: center;
 }
 
-.skills-row div: nth-child(2){
+.skills-row div: nth-child(2),
+.skills-view div:nth-child(1){
     text-align: left;
     justify-self: start;
     font-weight: bold;
     font-size: 16px;
 }
 
-.skills-row div: nth-child(n+3){
+.skills-row div{
     text-align: center;
     justify-self: center;
     width: 100%;
+    padding: 4px 6px;
 }
 
-.skills-row div{
-    padding: 4px 6px;
+.skills-edit input[type="checkbox"]{
+    margin: 0 auto;
+    display: block;
 }
 
 .skills-row input[type="checkbox"]{
