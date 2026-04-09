@@ -287,7 +287,6 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 
 .skills-row{
     display:grid;
-    grid-template-columns: 1fr 4fr 1fr 1fr 1fr 1fr;
     gap: 10px;
     padding:6px;
     border-bottom:1px solid #444;
@@ -337,6 +336,14 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     flex-direction:column;
     gap:5px;
     margin-top:30px;
+}
+
+.skills-edit{
+    grid-template-columns: 1fr 5fr 1fr 1fr 1fr 1fr;
+}
+
+.skills-view{
+    grid-template-columns: 5fr 1fr 1fr 1fr 1fr;
 }
 
 .skill-main{
