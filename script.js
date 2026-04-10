@@ -974,6 +974,8 @@ function vaiASkillsLevelUp(index){
         tsAltroTempra: parseInt(document.getElementById("tsAltro-Tempra").value) || 0,
         tsAltroRiflessi: parseInt(document.getElementById("tsAltro-Riflessi").value) || 0,
         tsAltroVolonta: parseInt(document.getElementById("tsAltro-Volontà").value) || 0
+        nuovaClasseNome: pg.levelUpMode === "new" ? document.getElementById("nuovaClasseNome")?.value?.trim() : null,
+        nuovaClasseSP: pg.levelUpMode === "new" ? parseInt(document.getElementById("nuovaClasseSP")?.value) || 0 : null
     };
     schermataSkillsLevelUp(index);
 }
@@ -1140,7 +1142,7 @@ function mostraNuovaClasse(index){
     <br><br>
     Nome nuova classe:<br><input id="nuovaClasseNome">
     <br><br>
-    Skill Points per livello:<br><input id="nuovaClasseSP" tipe="number" value="0">
+    Skill Points per livello:<br><input id="nuovaClasseSP" type="number" value="0">
     `;
     document.getElementById("sceltaClasse").innerHTML = html;
 }
@@ -1163,6 +1165,15 @@ function confermaLevelUp(index){
     }
     
     // CASO NUOVA CLASSE (già gestita in vaiASkillsLevelUp, il push è già avvenuto)
+    // CASO NUOVA CLASSE
+    if(pg.levelUpMode === "new"){
+        pg.classi.push({
+            nome: levelUpTemp.nuovaClasseNome,
+            livello: 1,
+            skillpointsPerLvl: levelUpTemp.nuovaClasseSP
+        });
+    }
+
     // AGGIUNTA PF
     pg.pfmax += pfGain;
     pg.pf += pfGain;
