@@ -62,7 +62,6 @@ let statBonusUsato = -1;
 let skillsTemp = {};
 let levelUpTemp = {};
 let skillPointsDisponibili = 0;
-let levelUpData = {};
 
 const XP_LEVELS = [
     0, 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000, 
@@ -434,7 +433,7 @@ function aggiornaSkillPointsNewPG(){
 
     skillPointsDisponibili = totale - puntiSpesi;
 
-    document.getElementById("skillPointsDisponibili").innerText = totale;
+    document.getElementById("skillPointsDisponibili").innerText = skillPointsDisponibili; //totale (prima)
     console.log("Totale:", totale, "Spesi:", puntiSpesi, "Disponibili:", skillPointsDisponibili);
 }
 
@@ -934,21 +933,51 @@ function pannelloLevelUp(index, livello){
 
 function vaiASkillsLevelUp(index){
     let pg = party[index];
-    // recupera classe scelta (ultima)
+    if(!pg.levelUpMode){
+        alert("Devi scegliere una modalità (classe esistente o nuova)");
+        return;
+    }
+    if(pg.levelUpMode === "existing" && pg.selectedClassIndex === null){
+        alert("Seleziona una classe esistente");
+        return;
+    }
+    if(pg.levelUpMode === "new"){
+        let nome = document.getElementById("nuovaClasseNome")?.value;
+        if(!nome || nome.trim() === ""){
+            alert("Inserisci il nome della nuova classe");
+            return;
+        }
+        let spInput = document.getElementById("nuovaClasseSP")?.value;
+        if(!spInput || spInput.trim() === "" || parseInt(spInput) <= 0){
+            alert("Inserisci un valore >0 per i punti abilità per livello della nuova classe");
+            return;
+        }
+    }
+    let pfGain = parseInt(document.getElementById("pfLevelUp").value);
+    if(isNaN(pfGain) || pfGain < 1 || pfGain > 20){
+        alert("I PF devono essere un numero tra 1 e 20");
+        return;
+    }
+
     let classe = pg.classi[pg.classi.length - 1];
     let modInt = Math.floor((pg.stats[3] - 10) / 2);
     let bonusUmano = pg.razza === "Umano" ? 1 : 0;
     let punti = classe.skillpointsPerLvl + modInt + bonusUmano;
-    // stato temporaneo
+
     levelUpTemp = {
         puntiDisponibili: punti,
-        skills: JSON.parse(JSON.stringify(pg.skills))
+        skills: JSON.parse(JSON.stringify(pg.skills)),
+        pfGain: pfGain,
+        tsBaseTempra: pg.savingThrows.Tempra.base,
+        tsBaseRiflessi: pg.savingThrows.Riflessi.base,
+        tsBaseVolonta: pg.savingThrows.Volontà.base,
+        tsAltroTempra: parseInt(document.getElementById("tsAltro-Tempra").value) || 0,
+        tsAltroRiflessi: parseInt(document.getElementById("tsAltro-Riflessi").value) || 0,
+        tsAltroVolonta: parseInt(document.getElementById("tsAltro-Volontà").value) || 0
     };
-    levelUpData = {
-        pfGain: parseInt(document.getElementById("pfLevelUp").value)
-    }
     schermataSkillsLevelUp(index);
 }
+
 
 function schermataSkillsLevelUp(index){
     let html = `
@@ -998,12 +1027,13 @@ function modSkillLevelUp(index, skill, delta){
     }
     let costo = s.classe ? 1 : 2;
     if(delta > 0){
-    let pg = party.find(p => p.skills === undefined ? false : true);
-    let max = maxGradiLivello(pg, skill);
+        //let pg = party.find(p => p.skills === undefined ? false : true);
+        let pg = party[index];
+        let max = maxGradiLivello(pg, skill);
     if(s.gradi >= max) return;
     if(levelUpTemp.puntiDisponibili < costo) return;
-    s.gradi += 1;
-    levelUpTemp.puntiDisponibili -= costo;
+        s.gradi += 1;
+        levelUpTemp.puntiDisponibili -= costo;
     }
     if(delta < 0){
         if(s.gradi <= 0) return;
@@ -1060,12 +1090,27 @@ function confermaLevelUpFinale(index){
 
 function modificaTSBase(index, tipoTS, delta) {
     let pg = party[index];
+
+    // Legge i valori "altro" correnti dal DOM prima di ridisegnare
+    const tsAltroTempra = parseInt(document.getElementById("tsAltro-Tempra")?.value) || pg.savingThrows.Tempra.altro;
+    const tsAltroRiflessi = parseInt(document.getElementById("tsAltro-Riflessi")?.value) || pg.savingThrows.Riflessi.altro;
+    const tsAltroVolonta = parseInt(document.getElementById("tsAltro-Volontà")?.value) || pg.savingThrows.Volontà.altro;
+
+    // Salva i valori "altro" prima del re-render
+    pg.savingThrows.Tempra.altro = tsAltroTempra;
+    pg.savingThrows.Riflessi.altro = tsAltroRiflessi;
+    pg.savingThrows.Volontà.altro = tsAltroVolonta;
+
     pg.savingThrows[tipoTS].base += delta;
     if (pg.savingThrows[tipoTS].base < 0) {
         pg.savingThrows[tipoTS].base = 0;
     }
-    pannelloLevelUp(index, livelloDaXP(pg.xp));
+
+    // Usa il livello già memorizzato nel pannello, non ricalcolato da XP
+    let livelloCorrente = parseInt(document.querySelector("p")?.textContent?.match(/\d+/)?.[0]) || livelloDaXP(pg.xp);
+    pannelloLevelUp(index, livelloCorrente);
 }
+
 
 function mostraClassi(index){
     let pg = party[index];
@@ -1094,65 +1139,43 @@ function mostraNuovaClasse(index){
     <button onclick="pannelloLevelUp(${index}, ${livelloDaXP(pg.xp)})">⬅ Indietro</button>
     <br><br>
     Nome nuova classe:<br><input id="nuovaClasseNome">
+    <br><br>
+    Skill Points per livello:<br><input id="nuovaClasseSP" tipe="number" value="0">
     `;
     document.getElementById("sceltaClasse").innerHTML = html;
 }
 
 function confermaLevelUp(index){
     let pg = party[index];
-    let pfGain = levelUpData.pfGain;
-    
-    // VALIDAZIONE PF
-    if(isNaN(pfGain) || pfGain < 1 || pfGain > 20){
-        alert("I PF devono essere un numero tra 1 e 20");
-        return;
-    }
-    
-    // VALIDAZIONE SCELTA
-    if(!pg.levelUpMode){
-        alert("Devi scegliere una modalità (classe esistente o nuova)");
-        return;
-    }
-    
-    // Salva i tiri salvezza aggiornati
-    pg.savingThrows.Tempra.altro = parseInt(document.getElementById("tsAltro-Tempra").value) || 0;
-    pg.savingThrows.Riflessi.altro = parseInt(document.getElementById("tsAltro-Riflessi").value) || 0;
-    pg.savingThrows.Volontà.altro = parseInt(document.getElementById("tsAltro-Volontà").value) || 0;
-    
+
+    let pfGain = levelUpTemp.pfGain;
+
+    pg.savingThrows.Tempra.base    = levelUpTemp.tsBaseTempra;
+    pg.savingThrows.Riflessi.base  = levelUpTemp.tsBaseRiflessi;
+    pg.savingThrows.Volontà.base   = levelUpTemp.tsBaseVolonta;
+    pg.savingThrows.Tempra.altro   = levelUpTemp.tsAltroTempra;
+    pg.savingThrows.Riflessi.altro = levelUpTemp.tsAltroRiflessi;
+    pg.savingThrows.Volontà.altro  = levelUpTemp.tsAltroVolonta;
+
     // CASO CLASSE ESISTENTE
     if(pg.levelUpMode === "existing"){
-        if(pg.selectedClassIndex === null){
-            alert("Seleziona una classe");
-            return;
-        }
         pg.classi[pg.selectedClassIndex].livello += 1;
     }
     
-    // CASO NUOVA CLASSE
-    if(pg.levelUpMode === "new"){
-        let nome = document.getElementById("nuovaClasseNome")?.value;
-        if(!nome || nome.trim() === ""){
-            alert("Inserisci il nome della nuova classe");
-            return;
-        }
-        pg.classi.push({
-            nome:nome.trim(),
-            livello:1
-        });
-    }
-    
+    // CASO NUOVA CLASSE (già gestita in vaiASkillsLevelUp, il push è già avvenuto)
     // AGGIUNTA PF
     pg.pfmax += pfGain;
     pg.pf += pfGain;
-    
     // PULIZIA
     pg.levelUpMode = null;
     pg.selectedClassIndex = null;
     pg.inLevelUp = false;
+    levelUpTemp = {};
 
     salva();
     apriPG(index);
-}    
+}
+    
 
 function modStat(statIndex, delta){
     let index = document.body.dataset.pgIndex;
@@ -1187,8 +1210,6 @@ function aggiornaBottoneSalva(){
         msg.innerText = "";
     }
 }
-
-menuPG();
 
 // ========================================================================
 // Initial Load
