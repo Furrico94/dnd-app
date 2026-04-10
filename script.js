@@ -1116,7 +1116,7 @@ function toggleClasseLevelUp(index, skill, value){
         document.getElementById(`lvl-gradi-${skill}`).innerText = s.gradi;
         document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
     }
-}   
+}
 
 function maxGradiLivello(pg, skill){
     let livelloTot = 0;
@@ -1131,7 +1131,8 @@ function maxGradiLivello(pg, skill){
     let isClasse = levelUpTemp.skills[skill]?.classe;
     if(isClasse){
         return livelloTot + 3;
-    } else {
+    } 
+    else {
         return Math.floor((livelloTot + 3) / 2);
     }
 }
