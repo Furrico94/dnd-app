@@ -301,15 +301,28 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     grid-template-columns: 5fr 1fr 1fr 1fr 1fr;
 }
 
+.skills-levelup{
+    grid-template-columns: 1fr 5fr 1fr 1fr 1fr;
+    margin-top: 20px;
+}
+
+#puntiLvlUp{
+    font-weight: bold;
+    font-size: 18px;
+    margin-left: 5px;
+}
+
 .skills-row div:nth-child(2),
-.skills-view div:nth-child(1){
+.skills-view div:nth-child(1),
+.skills-levelup div:nth-child(2){
     text-align: left;
     justify-self: start;
     font-weight: bold;
     font-size: 16px;
 }
 
-.skills-edit div:nth-child(n+3){
+.skills-edit div:nth-child(n+3),
+.skills-levelup div:nth-child(n+3){
     text-align: center;
     justify-self: center;
 }
@@ -327,6 +340,11 @@ text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 .skills-row div{
     width: 100%;
     padding: 4px 6px;
+}
+
+.skills-row:hover{
+    background:
+    rgba(255,255,0.05);
 }
 
 .skills-header{
