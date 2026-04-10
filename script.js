@@ -973,7 +973,7 @@ function vaiASkillsLevelUp(index){
         tsBaseVolonta: pg.savingThrows.Volontà.base,
         tsAltroTempra: parseInt(document.getElementById("tsAltro-Tempra").value) || 0,
         tsAltroRiflessi: parseInt(document.getElementById("tsAltro-Riflessi").value) || 0,
-        tsAltroVolonta: parseInt(document.getElementById("tsAltro-Volontà").value) || 0
+        tsAltroVolonta: parseInt(document.getElementById("tsAltro-Volontà").value) || 0,
         nuovaClasseNome: pg.levelUpMode === "new" ? document.getElementById("nuovaClasseNome")?.value?.trim() : null,
         nuovaClasseSP: pg.levelUpMode === "new" ? parseInt(document.getElementById("nuovaClasseSP")?.value) || 0 : null
     };
@@ -1164,7 +1164,6 @@ function confermaLevelUp(index){
         pg.classi[pg.selectedClassIndex].livello += 1;
     }
     
-    // CASO NUOVA CLASSE (già gestita in vaiASkillsLevelUp, il push è già avvenuto)
     // CASO NUOVA CLASSE
     if(pg.levelUpMode === "new"){
         pg.classi.push({
