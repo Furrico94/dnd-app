@@ -1006,13 +1006,15 @@ function schermataSkillsLevelUp(index){
         <div>-</div>
     </div>
     `;
+    let pg = party[index];
+    let isNuovaClasse = pg.levelUpMode === "new";
     Object.keys(SKILLS_CONFIG).forEach(skill => {
-    let s = levelUpTemp.skills[skill] || {gradi: 0, classe: false, gradiParziali: 0};
-    if(s.gradiParziali === undefined) s.gradiParziali = 0;
+        let s = levelUpTemp.skills[skill] || {gradi: 0, classe: false, gradiParziali: 0};
+        if(s.gradiParziali === undefined) s.gradiParziali = 0;
         let displayGradi = s.gradi + (s.gradiParziali === 1 ? ".5" : "");
         let checked = s.classe ? "checked" : "";
-        let disabled = s.classe ? "disabled" : "";
-    html += `
+        let disabled = (s.classe || !isNuovaClasse) ? "disabled" : "";
+        html += `
     <div class="skills-row skills-levelup">
         <div>
             <input type="checkbox"
@@ -1089,9 +1091,10 @@ function modSkillLevelUp(index, skill, delta){
 
 function toggleClasseLevelUp(index, skill, value){
     let pg = party[index];
+    if(pg.levelUpMode !== "new") return;
     let s = levelUpTemp.skills[skill];
     if(!s){
-        s = {gradi:0, classe:false};
+        s = {gradi:0, classe:false, gradiParziali:0};
         levelUpTemp.skills[skill] = s;
     }
     if(s.classe) return;
