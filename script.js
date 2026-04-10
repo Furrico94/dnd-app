@@ -1117,8 +1117,6 @@ function toggleClasseLevelUp(index, skill, value){
         document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
     }
 }   
-    }
-}
 
 function maxGradiLivello(pg, skill){
     let livelloTot = 0;
