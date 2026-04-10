@@ -1097,16 +1097,26 @@ function toggleClasseLevelUp(index, skill, value){
         s = {gradi:0, classe:false, gradiParziali:0};
         levelUpTemp.skills[skill] = s;
     }
-    if(s.classe) return;
+    if(s.gradiParziali === undefined) s.gradiParziali = 0;
+    let eraGiàDiClasse = party[index].skills?.[skill]?.classe || false;
+    if(eraGiàDiClasse) return;
     s.classe = value;
     let max = maxGradiLivello(pg, skill);
     if(s.gradi > max){
         let diff = s.gradi - max;
-        let costo = value ? 1 : 2;
+        levelUpTemp.puntiDisponibili += diff * (value ? 2 : 1); // se value=false, erano stati spesi a 1
         s.gradi = max;
-        levelUpTemp.puntiDisponibili += diff * costo;
-        document.getElementById(`lvl-gradi-${skill}`).innerText = max;
+        document.getElementById(`lvl-gradi-${skill}`).innerText = s.gradi + (s.gradiParziali === 1 ? ".5" : "");
         document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
+    }
+
+    if(!value && s.gradiParziali === 1){
+        s.gradiParziali = 0;
+        levelUpTemp.puntiDisponibili += 1;
+        document.getElementById(`lvl-gradi-${skill}`).innerText = s.gradi;
+        document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
+    }
+}   
     }
 }
 
