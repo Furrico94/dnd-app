@@ -62,6 +62,7 @@ let statBonusUsato = -1;
 let skillsTemp = {};
 let levelUpTemp = {};
 let skillPointsDisponibili = 0;
+let levelUpData = {};
 
 const XP_LEVELS = [
     0, 1000, 3000, 6000, 10000, 15000, 21000, 28000, 36000, 45000, 
@@ -943,6 +944,9 @@ function vaiASkillsLevelUp(index){
         puntiDisponibili: punti,
         skills: JSON.parse(JSON.stringify(pg.skills))
     };
+    levelUpData = {
+        pfGain: parseInt(document.getElementById("pfLevelUp").value)
+    }
     schermataSkillsLevelUp(index);
 }
 
@@ -1096,7 +1100,7 @@ function mostraNuovaClasse(index){
 
 function confermaLevelUp(index){
     let pg = party[index];
-    let pfGain = parseInt(document.getElementById("pfLevelUp").value);
+    let pfGain = levelUpData.pfGain;
     
     // VALIDAZIONE PF
     if(isNaN(pfGain) || pfGain < 1 || pfGain > 20){
