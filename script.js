@@ -410,18 +410,20 @@ function aggiornaSkillPointsNewPG(){
 
     if(classInputs.length > 0){
         let sp = parseInt(spInputs[0].value) || 0;
-        totale += (sp + modInt + bonusUmano) * 4;
+        let spPerLvl = Math.max(1, sp + modInt + bonusUmano); 
+        totale += spPerLvl * 4;                               
 
         let lvl = parseInt(levelInputs[0].value) || 1;
-        totale += (lvl - 1) * (sp + modInt + bonusUmano);
+        totale += (lvl - 1) * spPerLvl;                      
 
         for(let i=1;i<classInputs.length;i++){
             let sp2 = parseInt(spInputs[i].value) || 0;
             let lvl2 = parseInt(levelInputs[i].value) || 0;
-
-            totale += lvl2 * (sp2 + modInt + bonusUmano);
+            let spPerLvl2 = Math.max(1, sp2 + modInt + bonusUmano); 
+            totale += lvl2 * spPerLvl2;
         }
     }
+
 
     let puntiSpesi = 0;
 
@@ -547,7 +549,8 @@ function salvaPG(){
     skills[skill] = {
         gradi: skillsTemp[skill]?.gradi || 0,
         altro: 0,
-        classe: skillsTemp[skill]?.classe || false
+        classe: skillsTemp[skill]?.classe || false,
+        gradiParziali: 0
         };
     });
     let pg = {
@@ -959,10 +962,18 @@ function vaiASkillsLevelUp(index){
         return;
     }
 
-    let classe = pg.classi[pg.classi.length - 1];
     let modInt = Math.floor((pg.stats[3] - 10) / 2);
     let bonusUmano = pg.razza === "Umano" ? 1 : 0;
-    let punti = classe.skillpointsPerLvl + modInt + bonusUmano;
+    let spPerLvl;
+
+    if (pg.levelUpMode === "new") {
+        spPerLvl = parseInt(document.getElementById("nuovaClasseSP")?.value) || 0;
+    } else {
+        spPerLvl = pg.classi[pg.selectedClassIndex].skillpointsPerLvl;
+    }
+
+    let punti = Math.max(1, spPerLvl + modInt + bonusUmano);
+
 
     levelUpTemp = {
         puntiDisponibili: punti,
@@ -996,9 +1007,11 @@ function schermataSkillsLevelUp(index){
     </div>
     `;
     Object.keys(SKILLS_CONFIG).forEach(skill => {
-    let s = levelUpTemp.skills[skill] || {gradi:0, classe:false};
-    let checked = s.classe ? "checked" : "";
-    let disabled = s.classe ? "disabled" : "";
+    let s = levelUpTemp.skills[skill] || {gradi: 0, classe: false, gradiParziali: 0};
+    if(s.gradiParziali === undefined) s.gradiParziali = 0;
+        let displayGradi = s.gradi + (s.gradiParziali === 1 ? ".5" : "");
+        let checked = s.classe ? "checked" : "";
+        let disabled = s.classe ? "disabled" : "";
     html += `
     <div class="skills-row skills-levelup">
         <div>
@@ -1008,7 +1021,7 @@ function schermataSkillsLevelUp(index){
                 onchange="toggleClasseLevelUp(${index}, '${skill}', this.checked)">
         </div>
         <div>${skill}</div>
-        <div id="lvl-gradi-${skill}">${s.gradi}</div>
+        <div id="lvl-gradi-${skill}">${displayGradi}</div>
         <div><button onclick="modSkillLevelUp(${index}, '${skill}', 1)">+</button></div>
         <div><button onclick="modSkillLevelUp(${index}, '${skill}', -1)">-</button></div>
     </div>
@@ -1024,25 +1037,53 @@ function schermataSkillsLevelUp(index){
 function modSkillLevelUp(index, skill, delta){
     let s = levelUpTemp.skills[skill];
     if(!s){
-        s = {gradi:0, classe:false};
+        s = {gradi: 0, classe: false, gradiParziali: 0};
         levelUpTemp.skills[skill] = s;
     }
-    let costo = s.classe ? 1 : 2;
+    if(s.gradiParziali === undefined) s.gradiParziali = 0;
     if(delta > 0){
-        //let pg = party.find(p => p.skills === undefined ? false : true);
         let pg = party[index];
         let max = maxGradiLivello(pg, skill);
-    if(s.gradi >= max) return;
-    if(levelUpTemp.puntiDisponibili < costo) return;
-        s.gradi += 1;
-        levelUpTemp.puntiDisponibili -= costo;
+        if(s.classe){
+            if(s.gradi >= max) return;
+            if(levelUpTemp.puntiDisponibili < 1) return;
+            s.gradi += 1;
+            levelUpTemp.puntiDisponibili -= 1;
+        } else {
+            if(s.gradiParziali === 0){
+                if(levelUpTemp.puntiDisponibili < 1) return;
+                if(s.gradi >= max) return;
+                s.gradiParziali = 1;
+                levelUpTemp.puntiDisponibili -= 1;
+            } else {
+                if(levelUpTemp.puntiDisponibili < 1) return;
+                s.gradiParziali = 0;
+                s.gradi += 1;
+                levelUpTemp.puntiDisponibili -= 1;
+            }
+        }
     }
+
     if(delta < 0){
-        if(s.gradi <= 0) return;
-        s.gradi -= 1;
-        levelUpTemp.puntiDisponibili += costo;
+        if(s.classe){
+            if(s.gradi <= 0) return;
+            s.gradi -= 1;
+            levelUpTemp.puntiDisponibili += 1;
+        } else {
+            if(s.gradiParziali === 1){
+                s.gradiParziali = 0;
+                levelUpTemp.puntiDisponibili += 1;
+            } else {
+                if(s.gradi <= 0) return;
+                s.gradi -= 1;
+                s.gradiParziali = 1;
+                levelUpTemp.puntiDisponibili += 1;
+            }
+        }
     }
-    document.getElementById(`lvl-gradi-${skill}`).innerText = s.gradi;
+
+    let display = s.gradi + (s.gradiParziali === 1 ? ".5" : "");
+    document.getElementById(`lvl-gradi-${skill}`).innerText = display;
     document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
 }
 
@@ -1068,9 +1109,13 @@ function toggleClasseLevelUp(index, skill, value){
 
 function maxGradiLivello(pg, skill){
     let livelloTot = 0;
-    pg.classi.forEach(c => {
-        livelloTot += c.livello;
-    });
+    pg.classi.forEach(c => {livelloTot += c.livello;});
+    if(pg.levelUpMode === "existing"){
+        livelloTot += 1;
+    } else if(pg.levelUpMode === "new"){
+    livelloTot += 1;
+    }
+
     livelloTot += 1;
     let isClasse = levelUpTemp.skills[skill]?.classe;
     if(isClasse){
@@ -1149,7 +1194,6 @@ function mostraNuovaClasse(index){
 
 function confermaLevelUp(index){
     let pg = party[index];
-
     let pfGain = levelUpTemp.pfGain;
 
     pg.savingThrows.Tempra.base    = levelUpTemp.tsBaseTempra;
