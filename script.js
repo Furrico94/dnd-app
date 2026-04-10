@@ -952,7 +952,7 @@ function schermataSkillsLevelUp(index){
     <div>
         Punti disponibili: <span id="puntiLvlUp">${levelUpTemp.puntiDisponibili}</span>
     </div>
-    <div class="skills-row skills-header">
+    <div class="skills-row skills-header skills-levelup">
         <div>Classe</div>
         <div>Abilità</div>
         <div>Gradi</div>
@@ -965,7 +965,7 @@ function schermataSkillsLevelUp(index){
     let checked = s.classe ? "checked" : "";
     let disabled = s.classe ? "disabled" : "";
     html += `
-    <div class="skills-row">
+    <div class="skills-row skills-levelup">
         <div>
             <input type="checkbox"
                 ${checked}
