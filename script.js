@@ -1121,13 +1121,10 @@ function toggleClasseLevelUp(index, skill, value){
 function maxGradiLivello(pg, skill){
     let livelloTot = 0;
     pg.classi.forEach(c => {livelloTot += c.livello;});
-    if(pg.levelUpMode === "existing"){
-        livelloTot += 1;
-    } else if(pg.levelUpMode === "new"){
-    livelloTot += 1;
-    }
+    if(pg.levelUpMode === "existing" || pg.levelUpMode === "new"){
+        livelloTot += 1;}
 
-    livelloTot += 1;
+    //livelloTot += 1;
     let isClasse = levelUpTemp.skills[skill]?.classe;
     if(isClasse){
         return livelloTot + 3;
