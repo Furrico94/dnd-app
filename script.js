@@ -1110,7 +1110,7 @@ function toggleClasseLevelUp(index, skill, value){
         document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
     }
 
-    if(!value && s.gradiParziali === 1){
+    if(s.gradiParziali === 1){
         s.gradiParziali = 0;
         levelUpTemp.puntiDisponibili += 1;
         document.getElementById(`lvl-gradi-${skill}`).innerText = s.gradi;
