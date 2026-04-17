@@ -428,8 +428,11 @@ function aggiornaSkillPointsNewPG(){
     let puntiSpesi = 0;
 
     Object.values(skillsTemp).forEach(s => {
-    if(s.gradi){
-        puntiSpesi += s.gradi * (s.classe ? 1 : 2);
+        if(s.gradi){
+            puntiSpesi += s.gradi * (s.classe ? 1 : 2);
+        }
+        if(s.gradiParziali === 1 && !s.classe){
+            puntiSpesi += 1;
         }
     });
 
@@ -441,29 +444,55 @@ function aggiornaSkillPointsNewPG(){
 
 function modSkill(skill, delta){
     let s = skillsTemp[skill];
+    if(s.gradiParziali === undefined) s.gradiParziali = 0;
 
     let costo = s.classe ? 1 : 2;
 
     if(delta > 0){
-    let max = maxGradiConsentiti(skill);
+        let max = maxGradiConsentiti(skill);
+        if(skillPointsDisponibili < 1) return;
 
-    if(s.gradi >= max) return;
-    if(skillPointsDisponibili < costo) return;
-
-    s.gradi += 1;
-    skillPointsDisponibili -= costo;
+        if(s.classe){
+            if(s.gradi >= max) return;
+            s.gradi += 1;
+            skillPointsDisponibili -= 1;
+        } else {
+            if(s.gradiParziali === 0){
+                if(s.gradi >= max) return;
+                s.gradiParziali = 1;
+                skillPointsDisponibili -= 1;
+            } else {
+                if(skillPointsDisponibili < 1) return;
+                s.gradiParziali = 0;
+                s.gradi += 1;
+                skillPointsDisponibili -= 1;
+            }
+        }
     }
 
     if(delta < 0){
-        if(s.gradi <= 0) return;
-
-        s.gradi -= 1;
-        skillPointsDisponibili += costo;
+        if(s.classe){
+            if(s.gradi <= 0) return;
+            s.gradi -= 1;
+            skillPointsDisponibili += 1;
+        } else {
+            if(s.gradiParziali === 1){
+                s.gradiParziali = 0;
+                skillPointsDisponibili += 1;
+            } else {
+                if(s.gradi <= 0) return;
+                s.gradi -= 1;
+                s.gradiParziali = 1;
+                skillPointsDisponibili += 1;
+            }
+        }
     }
 
-    document.getElementById(`gradi-${skill}`).innerText = s.gradi;
+    let display = s.gradi + (s.gradiParziali === 1 ? ".5" : "");
+    document.getElementById(`gradi-${skill}`).innerText = display;
     document.getElementById("skillPointsDisponibili").innerText = skillPointsDisponibili;
 }
+
 
 function maxGradiConsentiti(skill){
     let livelloTot = 0;
@@ -1100,23 +1129,33 @@ function toggleClasseLevelUp(index, skill, value){
     if(s.gradiParziali === undefined) s.gradiParziali = 0;
     let eraGiàDiClasse = party[index].skills?.[skill]?.classe || false;
     if(eraGiàDiClasse) return;
-    s.classe = value;
-    let max = maxGradiLivello(pg, skill);
-    if(s.gradi > max){
-        let diff = s.gradi - max;
-        levelUpTemp.puntiDisponibili += diff * (value ? 2 : 1); // se value=false, erano stati spesi a 1
-        s.gradi = max;
-        document.getElementById(`lvl-gradi-${skill}`).innerText = s.gradi + (s.gradiParziali === 1 ? ".5" : "");
+
+    // Rimborsa tutti i gradi spesi durante questo level up al costo precedente
+    // I gradi del PG prima del level up non vanno toccati
+    let gradiPreesistenti = party[index].skills?.[skill]?.gradi || 0;
+    let gradiNuovi = s.gradi - gradiPreesistenti;
+    if(gradiNuovi < 0) gradiNuovi = 0;
+
+    // Rimborsa i gradi nuovi al costo con cui erano stati acquistati (costo VECCHIO = !value)
+    if(gradiNuovi > 0){
+        let costoVecchio = value ? 2 : 1; // se ora diventa di classe, prima era fuori classe (costo 2) e viceversa
+        levelUpTemp.puntiDisponibili += gradiNuovi * costoVecchio;
+        s.gradi = gradiPreesistenti;
+        document.getElementById(`lvl-gradi-${skill}`).innerText = s.gradi;
         document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
     }
 
+    // Rimborsa il mezzo grado parziale se presente
     if(s.gradiParziali === 1){
         s.gradiParziali = 0;
         levelUpTemp.puntiDisponibili += 1;
         document.getElementById(`lvl-gradi-${skill}`).innerText = s.gradi;
         document.getElementById("puntiLvlUp").innerText = levelUpTemp.puntiDisponibili;
     }
+
+    s.classe = value;
 }
+
 
 function maxGradiLivello(pg, skill){
     let livelloTot = 0;
